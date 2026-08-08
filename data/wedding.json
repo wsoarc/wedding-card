@@ -19,8 +19,22 @@
   ],
   "location": { "mapImage": "assets/images/map.svg", "mapAlt": "라온 웨딩하우스 주변 약도", "mapUrl": "#", "directionsUrl": "#", "transit": [{ "label": "지하철", "text": "더미역 3번 출구에서 도보 5분" }, { "label": "버스", "text": "더미 웨딩홀 정류장 하차" }, { "label": "주차", "text": "건물 지하 주차장 3시간 무료" }] },
   "accounts": [
-    { "side": "신랑측", "bank": "더미은행", "number": "000-0000-0000", "holder": "예금주 도윤" },
-    { "side": "신부측", "bank": "더미은행", "number": "000-0000-0000", "holder": "예금주 서윤" }
+    {
+      "side": "신랑측",
+      "accounts": [
+        { "relation": "신랑", "bank": "더미은행", "number": "000-0000-0000", "holder": "도윤" },
+        { "relation": "신랑 아버지", "bank": "더미은행", "number": "000-0000-0001", "holder": "김다정" },
+        { "relation": "신랑 어머니", "bank": "더미은행", "number": "000-0000-0002", "holder": "이온유" }
+      ]
+    },
+    {
+      "side": "신부측",
+      "accounts": [
+        { "relation": "신부", "bank": "더미은행", "number": "000-0000-0010", "holder": "서윤" },
+        { "relation": "신부 아버지", "bank": "더미은행", "number": "000-0000-0011", "holder": "박하늘" },
+        { "relation": "신부 어머니", "bank": "더미은행", "number": "000-0000-0012", "holder": "최봄" }
+      ]
+    }
   ],
   "music": { "enabled": true, "src": "assets/audio/wedding-music.wav", "title": "Wedding Music" }
 }
