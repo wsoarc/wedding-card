@@ -1,0 +1,26 @@
+{
+  "couple": { "groom": "도윤", "bride": "서윤" },
+  "wedding": {
+    "date": "2026-10-24T14:00:00+09:00", "displayDate": "2026년 10월 24일", "day": "토요일", "time": "오후 2시",
+    "venue": "라온 웨딩하우스", "hall": "가든 그랜드홀", "address": "서울특별시 ○○구 ○○로 123"
+  },
+  "hero": { "image": "assets/images/hero.svg", "alt": "꽃으로 둘러싸인 신랑과 신부의 일러스트", "intro": "우리의 새로운 시작에\n소중한 분들을 초대합니다." },
+  "invitation": { "label": "INVITATION", "title": "저희, 결혼합니다", "paragraphs": ["서로 다른 계절을 지나온 두 사람이", "이제는 같은 곳을 바라보며 함께 걸어가려 합니다.", "소중한 분들을 모시고 새로운 시작을 함께하고 싶습니다."] },
+  "story": [
+    { "year": "2020", "title": "처음 마주한 봄", "description": "낯선 듯 반가웠던 첫 인사에서 우리의 이야기가 시작되었습니다." },
+    { "year": "2023", "title": "함께한 계절들", "description": "기쁜 날도 평범한 날도 서로의 가장 가까운 편이 되었습니다." },
+    { "year": "2025", "title": "평생을 약속한 날", "description": "앞으로의 모든 계절을 함께하기로 약속했습니다." },
+    { "year": "2026", "title": "결혼합니다", "description": "따뜻한 축복 속에서 새로운 첫걸음을 내딛습니다." }
+  ],
+  "gallery": [
+    { "src": "assets/images/gallery-01.svg", "alt": "따뜻한 햇살 아래의 부케" }, { "src": "assets/images/gallery-02.svg", "alt": "정원에서 함께 걷는 두 사람" },
+    { "src": "assets/images/gallery-03.svg", "alt": "꽃과 반지의 작은 순간" }, { "src": "assets/images/gallery-04.svg", "alt": "창가의 신부 실루엣" },
+    { "src": "assets/images/gallery-05.svg", "alt": "축하의 테이블 플라워" }, { "src": "assets/images/gallery-06.svg", "alt": "노을빛 아래 두 사람" }
+  ],
+  "location": { "mapImage": "assets/images/map.svg", "mapAlt": "라온 웨딩하우스 주변 약도", "mapUrl": "#", "directionsUrl": "#", "transit": [{ "label": "지하철", "text": "더미역 3번 출구에서 도보 5분" }, { "label": "버스", "text": "더미 웨딩홀 정류장 하차" }, { "label": "주차", "text": "건물 지하 주차장 3시간 무료" }] },
+  "accounts": [
+    { "side": "신랑측", "bank": "더미은행", "number": "000-0000-0000", "holder": "예금주 도윤" },
+    { "side": "신부측", "bank": "더미은행", "number": "000-0000-0000", "holder": "예금주 서윤" }
+  ],
+  "music": { "enabled": true, "src": "assets/audio/wedding-music.wav", "title": "Wedding Music" }
+}
