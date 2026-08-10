@@ -4,7 +4,12 @@
     "date": "2026-10-24T14:00:00+09:00", "displayDate": "2026년 10월 24일", "day": "토요일", "time": "오후 2시",
     "venue": "라온 웨딩하우스", "hall": "가든 그랜드홀", "address": "서울특별시 ○○구 ○○로 123"
   },
-  "hero": { "image": "assets/images/hero.svg", "alt": "꽃으로 둘러싸인 신랑과 신부의 일러스트", "intro": "우리의 새로운 시작에\n소중한 분들을 초대합니다." },
+  "hero": {
+    "image": "assets/images/hero.svg",
+    "alt": "꽃으로 둘러싸인 신랑과 신부의 일러스트",
+    "coverTitle": ["우리", "둘의", "첫 시작"],
+    "closing": "저희, 결혼합니다."
+  },
   "invitation": { "label": "INVITATION", "title": "저희, 결혼합니다", "paragraphs": ["서로 다른 계절을 지나온 두 사람이", "이제는 같은 곳을 바라보며 함께 걸어가려 합니다.", "소중한 분들을 모시고 새로운 시작을 함께하고 싶습니다."] },
   "story": [
     { "year": "2020", "title": "처음 마주한 봄", "description": "낯선 듯 반가웠던 첫 인사에서 우리의 이야기가 시작되었습니다." },
