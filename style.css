@@ -388,7 +388,6 @@ body {
 }
 
 .link-row a,
-.copy-button,
 .outline-button {
   flex: 1;
   display: grid;
@@ -432,7 +431,7 @@ body {
 }
 
 .account-group {
-  background: #f7f2e9a8;
+  background: transparent;
   border: 1px solid #e7ddce;
   border-radius: var(--radius-sm);
   overflow: hidden
@@ -447,7 +446,13 @@ body {
   cursor: pointer;
   list-style: none;
   font-family: var(--serif);
-  font-size: 18px
+  font-size: 18px;
+  background: #ece2cf
+}
+
+.account-group summary span {
+  flex: 1;
+  text-align: center
 }
 
 .account-group summary::-webkit-details-marker {
@@ -455,14 +460,33 @@ body {
 }
 
 .account-group summary:after {
-  content: '⌄';
-  font: 20px var(--sans);
-  color: var(--color-accent);
+  content: '';
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-left: 4px;
+  border-right: 1.5px solid var(--color-accent);
+  border-bottom: 1.5px solid var(--color-accent);
+  transform: rotate(45deg);
+  transform-origin: 50% 50%;
   transition: transform .25s
 }
 
-.account-group[open] summary:after {
-  transform: rotate(180deg)
+.account-group.is-open summary:after {
+  transform: rotate(225deg)
+}
+
+.account-group .account-items {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .35s ease;
+  overflow: visible;
+  height: auto;
+  background: var(--color-surface)
+}
+
+.account-group.is-open .account-items {
+  grid-template-rows: 1fr
 }
 
 .account-group summary small {
@@ -472,17 +496,23 @@ body {
   color: var(--color-muted)
 }
 
-.account-items {
+.account-items-inner {
+  min-height: 0;
+  overflow: hidden;
   padding: 0 18px 7px
 }
 
 .account-item {
-  display: grid;
-  grid-template-columns: 32px 1fr;
-  gap: 12px;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 14px 0;
   border-top: 1px solid #e7ddce
+}
+
+.account-item:first-child {
+  border-top: none
 }
 
 .account-list h3 {
@@ -492,7 +522,7 @@ body {
 
 .account-list p {
   margin: 1px 0;
-  font-size: 12px;
+  font-size: 15px;
   color: var(--color-muted)
 }
 
@@ -503,17 +533,24 @@ body {
 }
 
 .copy-button {
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  display: grid;
-  place-items: center;
+  flex: 0 0 auto;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
   border: 1px solid #b9aa97;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   background: #fffdf9cc;
   color: var(--color-accent);
-  font: 18px var(--sans);
-  cursor: pointer
+  font: 500 12px var(--sans);
+  cursor: pointer;
+  white-space: nowrap
+}
+
+.copy-icon {
+  font-size: 15px;
+  line-height: 1
 }
 
 .copy-button:active {
