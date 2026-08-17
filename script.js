@@ -24,7 +24,7 @@ function page(d) {
 <section class="section story reveal"><p class="section-label">OUR STORY</p><h2>우리의 시간</h2><ol class="timeline">${(d.story || []).map(x => `<li><time>${esc(x.year)}</time><div><h3>${esc(x.title)}</h3><p>${esc(x.description)}</p></div></li>`).join('')}</ol></section>
 <section class="section gallery-section reveal"><p class="section-label">GALLERY</p><h2>우리의 순간</h2><div class="gallery">${gallery.map((x, i) => `<button class="gallery-item" data-index="${i}" aria-label="${i + 1}번째 사진 크게 보기"><img src="${esc(x.src)}" alt="${esc(x.alt)}" loading="lazy"></button>`).join('')}</div></section>
 <section class="section info reveal"><p class="section-label">WEDDING DAY</p><h2>${esc(when.display)}<br>${esc(when.weekday)} ${esc(when.time)}</h2>${weddingCalendar(when)}<strong class="dday">${ddaySentence(w.date, c.groom, c.bride)}</strong><div class="countdown" id="countdown" data-target="${esc(w.date)}"><div class="countdown-unit"><span class="countdown-value" data-unit="days">00</span><small>DAYS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="hours">00</span><small>HRS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="minutes">00</span><small>MIN</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="seconds">00</span><small>SEC</small></div></div></section>
-<section class="section location reveal"><p class="section-label">LOCATION</p><h2>오시는 길</h2><img class="map" src="${esc(d.location?.mapImage)}" alt="${esc(d.location?.mapAlt || `${w.venue || '예식장'} 주변 약도`)}" loading="lazy"><p class="address">${esc(w.address)}</p><div class="link-row"><a href="${esc(d.location?.mapUrl || '#')}" target="_blank" rel="noopener">지도 보기</a><a href="${esc(d.location?.directionsUrl || '#')}" target="_blank" rel="noopener">길찾기</a></div><div class="transit">${(d.location?.transit || []).map(x => `<p><b>${esc(x.label)}</b><span>${esc(x.text)}</span></p>`).join('')}</div></section>
+<section class="section location reveal"><p class="section-label">LOCATION</p><h2>오시는 길</h2><div id="naverMap" class="map" role="img" aria-label="${esc(d.location?.mapAlt || `${w.venue || '예식장'} 주변 지도`)}"><noscript><img class="map" src="${esc(d.location?.mapImage)}" alt="${esc(d.location?.mapAlt || `${w.venue || '예식장'} 주변 약도`)}"></noscript></div><p class="address">${esc(w.address)}</p><div class="link-row"><a href="${esc(d.location?.mapUrl || '#')}" target="_blank" rel="noopener">지도 보기</a><a href="${esc(d.location?.directionsUrl || '#')}" target="_blank" rel="noopener">길찾기</a></div><div class="transit">${(d.location?.transit || []).map(x => `<p><b>${esc(x.label)}</b><span>${esc(x.text)}</span></p>`).join('')}</div></section>
 <section class="section accounts reveal"><p class="section-label">WITH LOVE</p><h2>마음 전하실 곳</h2><div class="account-list">${(d.accounts || []).map((group, groupIndex) => `<details class="account-group"><summary><span>${esc(group.side)} 계좌번호</span></summary><div class="account-items"><div class="account-items-inner">${(group.accounts || []).map((account, accountIndex) => `<article class="account-item"><div><h3>${esc(account.holder)}</h3><p>${esc(account.bank)} <b>${esc(account.number)}</b></p></div><button class="copy-button" data-group="${groupIndex}" data-account="${accountIndex}" aria-label="${esc(account.relation)} 계좌번호 복사"><span class="copy-icon">⧉</span>복사</button></article>`).join('')}</div></div></details>`).join('')}</div></section>
 <section class="section guestbook reveal"><p class="section-label">GUESTBOOK</p><h2>축하의 마음을<br>남겨주세요</h2><p>정성스러운 마음으로 준비 중인 공간입니다.</p><button id="guestbookButton" class="outline-button">축하 메시지 남기기</button></section>
 <footer class="thanks reveal"><span>Thank you for celebrating with us</span><h2>${esc(c.groom)} <i>&amp;</i> ${esc(c.bride)}</h2><p>${esc(when.display)}</p></footer>`;
@@ -62,7 +62,7 @@ function setupAccordion() {
   });
 }
 
-function setup(d) { $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-item').forEach(b => b.addEventListener('click', () => openLightbox(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); $('#guestbookButton').addEventListener('click', () => toast('방명록은 따뜻하게 준비 중이에요.')); setupAccordion(); setupCountdown(); setupAudio(d.music); }
+function setup(d) { $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-item').forEach(b => b.addEventListener('click', () => openLightbox(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); $('#guestbookButton').addEventListener('click', () => toast('방명록은 따뜻하게 준비 중이에요.')); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); }
 let __countdownTimer = null;
 function setupCountdown() {
   const el = $('#countdown');
@@ -94,6 +94,25 @@ function setupCountdown() {
   tick();
   clearInterval(__countdownTimer);
   __countdownTimer = setInterval(tick, 1000);
+}
+
+function setupMap(loc) {
+  const el = $('#naverMap');
+  if (!el) return;
+  const lat = Number(loc?.lat), lng = Number(loc?.lng);
+  if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+  if (!window.naver?.maps) {
+    el.innerHTML = `<img class="map" src="${esc(loc?.mapImage || '')}" alt="${esc(el.getAttribute('aria-label') || '')}" loading="lazy">`;
+    return;
+  }
+  const position = new naver.maps.LatLng(lat, lng);
+  const map = new naver.maps.Map(el, {
+    center: position,
+    zoom: loc.zoom || 17,
+    zoomControl: true,
+    zoomControlOptions: { position: naver.maps.Position.TOP_RIGHT }
+  });
+  new naver.maps.Marker({ position, map, title: loc.mapAlt || '' });
 }
 
 function setupAudio(music) { const btn = $('#musicButton'); if (!music?.enabled || !music.src) { btn.hidden = true; return; } audio = new Audio(music.src); audio.loop = true; audio.volume = .35; const update = playing => { btn.textContent = playing ? 'Ⅱ' : '♪'; btn.setAttribute('aria-label', playing ? '배경 음악 일시 정지' : '배경 음악 재생'); btn.setAttribute('aria-pressed', playing); }; audio.addEventListener('play', () => update(true)); audio.addEventListener('pause', () => update(false)); audio.addEventListener('error', () => { btn.hidden = true; }); audio.play().catch(() => update(false)); btn.addEventListener('click', () => audio.paused ? audio.play().catch(() => toast('음악을 재생할 수 없습니다.')) : audio.pause()); }

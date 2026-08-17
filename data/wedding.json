@@ -71,9 +71,12 @@
     }
   ],
   "location": {
-    "mapImage": "assets/images/map.svg",
-    "mapUrl": "#",
-    "directionsUrl": "#",
+    "lat": 37.5665,
+    "lng": 126.9780,
+    "zoom": 17,
+    "mapAlt": "라온 웨딩하우스 주변 지도",
+    "mapUrl": "https://map.naver.com/p/search/라온 웨딩하우스",
+    "directionsUrl": "https://map.naver.com/p/search/라온 웨딩하우스/place",
     "transit": [
       {
         "label": "지하철",
