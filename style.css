@@ -52,21 +52,27 @@ body {
 
 .hero {
   position: relative;
-  padding: 16px;
-  background: #f3ede4;
+  padding: 0;
+  background: transparent;
   text-align: center;
   animation: hero-reveal .9s both
 }
 
 .hero-frame {
-  border: 1px solid #d8cfc1;
-  background: #f8f3eb;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 720px;
+  border: 0;
+  background: #e6d9c3;
   overflow: hidden
 }
 
 .hero-illustration {
-  height: 490px;
-  overflow: hidden;
+  position: absolute;
+  inset: 0;
+  height: 100%;
   background: #e6d9c3
 }
 
@@ -78,8 +84,12 @@ body {
 }
 
 .hero-copy {
+  position: relative;
+  z-index: 1;
   padding: 34px 20px 50px;
-  color: var(--color-text)
+  color: #fff;
+  text-shadow: 0 1px 12px rgba(20, 14, 8, .45);
+  background: linear-gradient(180deg, rgba(20, 14, 8, 0) 0%, rgba(20, 14, 8, .38) 30%, rgba(20, 14, 8, .58) 100%)
 }
 
 .hero-names {
@@ -105,13 +115,13 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  color: #5e493e;
+  color: #fff;
   font: 400 22px/1 var(--serif)
 }
 
 .hero-names time i {
   width: 26px;
-  border-top: 1px solid #836d5d;
+  border-top: 1px solid rgba(255, 255, 255, .8);
   transform: rotate(-22deg);
   margin: 3px 0
 }
@@ -124,14 +134,14 @@ body {
   font: 400 11px var(--serif);
   letter-spacing: .16em;
   margin: 28px 0 7px;
-  color: #5b473b
+  color: #fff
 }
 
 .hero-venue {
   font: 400 15px var(--serif);
   letter-spacing: .01em;
   margin: 0;
-  color: #5b473b
+  color: #fff
 }
 
 .eyebrow,
