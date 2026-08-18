@@ -230,6 +230,36 @@ body {
   margin: 0
 }
 
+.invitation-divider {
+  width: 36px;
+  height: 1px;
+  margin: 26px auto 18px;
+  border: none;
+  background: #d8c3bd
+}
+
+.invitation-parents {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 2.2;
+  color: #64564a;
+  letter-spacing: .01em
+}
+
+.invitation-child {
+  display: inline-block;
+  min-width: 28px;
+  text-align: center
+}
+
+.invitation-name {
+  color: var(--color-text);
+  font-weight: 700
+}
+
 .story {
   text-align: left
 }

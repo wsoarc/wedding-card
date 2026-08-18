@@ -1,7 +1,17 @@
 {
   "couple": {
     "groom": "도윤",
-    "bride": "서윤"
+    "bride": "서윤",
+    "groomParents": {
+      "father": "김대영",
+      "mother": "이온유",
+      "child": "아들"
+    },
+    "brideParents": {
+      "father": "박하늘",
+      "mother": "최봄봄",
+      "child": "딸"
+    }
   },
   "wedding": {
     "date": "2026-10-25T14:00:00+09:00",
