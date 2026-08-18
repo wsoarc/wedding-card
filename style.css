@@ -321,6 +321,12 @@ body {
   margin-bottom: 28px
 }
 
+.wedding-day-time {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 16px
+}
+
 .calendar {
   max-width: 302px;
   margin: 0 auto 27px;
