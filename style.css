@@ -230,6 +230,10 @@ body {
   margin: 0
 }
 
+.prose p:empty {
+  height: 1em
+}
+
 .invitation-divider {
   width: 36px;
   height: 1px;
