@@ -356,12 +356,6 @@ body {
   border-bottom: 1px solid var(--color-rule)
 }
 
-.calendar-month {
-  margin: 0 0 14px;
-  font: 400 17px var(--serif);
-  letter-spacing: .08em
-}
-
 .calendar-weekdays,
 .calendar-days {
   display: grid;
@@ -371,7 +365,8 @@ body {
 
 .calendar-weekdays {
   margin-bottom: 8px;
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--color-muted)
 }
 
@@ -384,10 +379,10 @@ body {
 }
 
 .calendar-days span {
-  height: 29px;
+  height: 30px;
   display: grid;
   place-items: center;
-  font-size: 12px
+  font-size: 14px
 }
 
 .calendar-day.calendar-event {
@@ -408,14 +403,15 @@ body {
 }
 
 .info .dday {
-  display: inline-block
+  display: inline-block;
+  margin-top: 16px
 }
 
 .countdown {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 4px;
   margin-top: 22px
 }
 
@@ -423,31 +419,28 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  min-width: 52px;
-  padding: 10px 4px;
-  background: var(--color-surface);
-  border: 1px solid #e5ddcf;
-  border-radius: var(--radius-sm)
+  gap: 4px;
+  min-width: 42px;
+  padding: 8px 2px
 }
 
 .countdown-value {
-  font: 400 26px var(--serif);
+  font: 400 22px var(--serif);
   color: var(--color-text);
   font-variant-numeric: tabular-nums
 }
 
 .countdown-unit small {
-  font-size: 10px;
-  letter-spacing: .1em;
+  font-size: 9px;
+  letter-spacing: .06em;
   color: var(--color-muted)
 }
 
 .countdown-sep {
-  font: 400 20px var(--serif);
+  font: 400 18px var(--serif);
   color: var(--color-rule);
   align-self: center;
-  margin-top: -6px
+  margin-top: -4px
 }
 
 .countdown.countdown-done .countdown-value {
