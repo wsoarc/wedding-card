@@ -146,7 +146,7 @@ body {
 
 .eyebrow,
 .section-label {
-  font-size: 10px;
+  font-size: 18px;
   letter-spacing: .2em;
   color: var(--color-accent);
   font-weight: 600;
@@ -683,24 +683,6 @@ body {
 
 .copy-button:active {
   transform: scale(.92)
-}
-
-.guestbook>p {
-  color: var(--color-muted);
-  font-size: 13px;
-  margin: -13px 0 25px
-}
-
-.guestbook .guestbook-heading {
-  margin: 0 0 31px;
-  color: transparent;
-  font-size: 0
-}
-
-.guestbook .guestbook-heading:after {
-  content: '방명록';
-  color: var(--color-text);
-  font: 400 27px/1.5 var(--serif)
 }
 
 .guestbook-slider-wrap {
