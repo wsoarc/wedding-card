@@ -1,3 +1,5 @@
+import { addGuestbookEntry, isFirebaseConfigured, subscribeGuestbook } from './firebase-guestbook.js';
+
 // --- 확대(줌) 억제: 핀치줌(Safari gesture), 더블탭 줌, Ctrl+휠 줌 차단 ---
 ['gesturestart', 'gesturechange', 'gestureend'].forEach(evt =>
   document.addEventListener(evt, e => e.preventDefault())
@@ -12,7 +14,7 @@ document.addEventListener('touchend', e => {
 
 const $ = (s, p = document) => p.querySelector(s);
 const esc = (value = '') => String(value).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
-let data, gallery = [], activeImage = 0, audio;
+let data, gallery = [], activeImage = 0, audio, guestbookEntries = [];
 const toast = message => { const el = $('#toast'); el.textContent = message; el.classList.add('show'); clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove('show'), 2200); };
 const ddaySentence = (iso, groom, bride) => { const wedding = new Date(iso); if (Number.isNaN(wedding)) return ''; const now = new Date(); const inKorea = d => new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Seoul' })); const a = inKorea(now); const b = inKorea(wedding); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); const days = Math.round((b - a) / 86400000); const names = `${esc(groom)} <i>&amp;</i> ${esc(bride)}`; if (days === 0) return `오늘은 ${names}의 <b class="dday-count">결혼식</b>이에요`; if (days > 0) return `${names}의 결혼식까지 <b class="dday-count">${days}일</b> 남았어요`; return `${names}가 결혼한 지 <b class="dday-count">${Math.abs(days)}일</b> 되었어요`; };
 const weddingDate = iso => { const value = new Date(iso); if (Number.isNaN(value)) return { year: '', month: '', day: '', display: '', weekday: '', time: '' }; const values = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: '2-digit', hour12: true }).formatToParts(value).filter(p => p.type !== 'literal').map(p => [p.type, p.value])); const weekday = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', weekday: 'long' }).format(value); const hour = Number(values.hour); const minute = Number(values.minute); const time = `${values.dayPeriod === 'PM' ? '오후' : '오전'} ${hour}시${minute ? ` ${minute}분` : ''}`; return { year: values.year, month: values.month, day: values.day, display: `${values.year}.${values.month}.${values.day}`, weekday, time }; };
@@ -25,7 +27,7 @@ function page(d) {
 <section class="section gallery-section reveal"><p class="section-label">GALLERY</p><h2>우리의 순간</h2><div class="gallery-featured"><img id="galleryFeaturedImg" src="${esc(gallery[0]?.src)}" alt="${esc(gallery[0]?.alt || '')}"></div><div class="gallery-thumbs">${gallery.map((x, i) => `<button type="button" class="gallery-thumb${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="${i + 1}번째 사진 선택"><img src="${esc(x.src)}" alt="${esc(x.alt)}" loading="lazy"></button>`).join('')}</div></section>
 <section class="section location reveal"><p class="section-label">LOCATION</p><h2>오시는 길</h2><div id="naverMap" class="map" role="img" aria-label="${esc(d.location?.mapAlt || `${w.venue || '예식장'} 주변 지도`)}"><noscript><img class="map" src="${esc(d.location?.mapImage)}" alt="${esc(d.location?.mapAlt || `${w.venue || '예식장'} 주변 약도`)}"></noscript></div><div class="map-nav-buttons"><button type="button" class="map-nav-button" data-nav="naver"><img class="map-nav-icon" src="assets/icons/naver.png" alt="" loading="lazy"><span>네이버지도</span></button><button type="button" class="map-nav-button" data-nav="kakao"><img class="map-nav-icon" src="assets/icons/kakao.png" alt="" loading="lazy"><span>카카오맵</span></button><button type="button" class="map-nav-button" data-nav="tmap"><img class="map-nav-icon" src="assets/icons/tmap.png" alt="" loading="lazy"><span>티맵</span></button></div><p class="address">${esc(w.address)}</p><div class="transit">${(d.location?.transit || []).map(x => `<p><b>${esc(x.label)}</b><span>${esc(x.text)}</span></p>`).join('')}</div></section>
 <section class="section accounts reveal"><p class="section-label">WITH LOVE</p><h2>마음 전하실 곳</h2><div class="account-list">${(d.accounts || []).map((group, groupIndex) => `<details class="account-group"><summary><span>${esc(group.side)} 계좌번호</span></summary><div class="account-items"><div class="account-items-inner">${(group.accounts || []).map((account, accountIndex) => `<article class="account-item"><div><h3>${esc(account.holder)}</h3><p>${esc(account.bank)} <b>${esc(account.number)}</b></p></div><button class="copy-button" data-group="${groupIndex}" data-account="${accountIndex}" aria-label="${esc(account.relation)} 계좌번호 복사"><span class="copy-icon">⧉</span>복사</button></article>`).join('')}</div></div></details>`).join('')}</div></section>
-<section class="section guestbook reveal"><p class="section-label">GUESTBOOK</p><h2>축하의 마음을<br>남겨주세요</h2><p>정성스러운 마음으로 준비 중인 공간입니다.</p><button id="guestbookButton" class="outline-button">축하 메시지 남기기</button></section>
+<section class="section guestbook reveal"><p class="section-label">GUESTBOOK</p><p class="guestbook-heading">축하의 마음을 남겨 주세요.</p><div class="guestbook-slider-wrap"><div id="guestbookEntries" class="guestbook-entries" aria-live="polite" aria-label="방명록 목록"><p class="guestbook-state">방명록을 불러오는 중이에요.</p></div></div><div class="guestbook-slider-actions"><button id="guestbookWrite" type="button">✏️작성하기</button><button id="guestbookAll" type="button">📖전체보기</button></div><form id="guestbookForm" class="guestbook-form" hidden><label>이름<input id="guestbookName" name="name" maxlength="20" autocomplete="name" required placeholder="이름을 입력해 주세요"></label><label>축하 메시지<textarea id="guestbookMessage" name="message" maxlength="300" required placeholder="두 분을 위한 축하의 마음을 남겨 주세요"></textarea></label><div class="guestbook-form-actions"><button id="guestbookCancel" class="guestbook-cancel" type="button">취소</button><button class="guestbook-submit" type="submit">남기기</button></div></form><dialog id="guestbookAllDialog" class="guestbook-all-dialog"><div class="guestbook-all-header"><h2>방명록 전체보기</h2><button id="guestbookAllClose" type="button" aria-label="전체보기 닫기">×</button></div><div id="guestbookAllEntries" class="guestbook-all-entries"></div></dialog></section>
 <footer class="thanks reveal"><span>Thank you for celebrating with us</span><h2>${esc(c.groom)} <i>&amp;</i> ${esc(c.bride)}</h2><p>${esc(when.display)}</p></footer>`;
 }
 function setFeaturedImage(index) {
@@ -67,7 +69,163 @@ function setupAccordion() {
   });
 }
 
-function setup(d) { $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); $('#guestbookButton').addEventListener('click', () => toast('방명록은 따뜻하게 준비 중이에요.')); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); }
+function renderGuestbookEntries(entries) {
+  guestbookEntries = entries;
+  const container = $('#guestbookEntries');
+  if (!container) return;
+  container.replaceChildren();
+  entries.forEach(entry => {
+    const item = document.createElement('article');
+    item.className = 'guestbook-entry';
+    const decoration = document.createElement('div');
+    decoration.className = 'guestbook-note-decoration';
+    decoration.innerHTML = '<span aria-hidden="true">✽</span>';
+    const name = document.createElement('strong');
+    name.textContent = `- ${entry.name} -`;
+    const message = document.createElement('p');
+    message.textContent = entry.message;
+    item.append(decoration, message, name);
+    container.append(item);
+  });
+  const compose = document.createElement('article');
+  compose.className = 'guestbook-entry guestbook-compose-card';
+  const composeButton = document.createElement('button');
+  composeButton.type = 'button';
+  composeButton.dataset.guestbookCompose = 'true';
+  composeButton.textContent = '방명록 작성하기';
+  composeButton.addEventListener('click', event => {
+    event.stopPropagation();
+    document.dispatchEvent(new Event('guestbook-compose'));
+  });
+  compose.append(composeButton);
+  container.append(compose);
+}
+
+function setupGuestbook() {
+  const form = $('#guestbookForm'), entries = $('#guestbookEntries');
+  if (!form || !entries) return;
+  const writeDialog = document.createElement('dialog');
+  writeDialog.className = 'guestbook-all-dialog guestbook-write-dialog';
+  const writeHeader = document.createElement('div');
+  writeHeader.className = 'guestbook-all-header';
+  writeHeader.innerHTML = '<h2>방명록 작성하기</h2><button type="button" aria-label="작성 창 닫기">×</button>';
+  writeDialog.append(writeHeader, form);
+  document.body.append(writeDialog);
+  const openForm = () => {
+    form.hidden = false;
+    writeDialog.showModal();
+    setTimeout(() => $('#guestbookName')?.focus(), 0);
+  };
+  const closeForm = () => {
+    form.reset();
+    form.hidden = true;
+    writeDialog.close();
+  };
+  writeHeader.querySelector('button').addEventListener('click', closeForm);
+  writeDialog.addEventListener('cancel', event => {
+    event.preventDefault();
+    closeForm();
+  });
+  document.addEventListener('guestbook-compose', openForm);
+  let dragStartX = 0, dragStartScroll = 0, dragging = false, suppressClick = false, composePointerPressed = false;
+  entries.addEventListener('pointerdown', event => {
+    if (event.pointerType !== 'mouse' || event.button !== 0) return;
+    composePointerPressed = Boolean(event.target.closest('[data-guestbook-compose]'));
+    dragStartX = event.clientX;
+    dragStartScroll = entries.scrollLeft;
+    dragging = false;
+    entries.setPointerCapture(event.pointerId);
+    entries.classList.add('is-dragging');
+  });
+  entries.addEventListener('pointermove', event => {
+    if (!entries.hasPointerCapture(event.pointerId)) return;
+    const distance = event.clientX - dragStartX;
+    if (Math.abs(distance) > 4) dragging = true;
+    entries.scrollLeft = dragStartScroll - distance;
+  });
+  const endDrag = event => {
+    if (!entries.hasPointerCapture(event.pointerId)) return;
+    entries.releasePointerCapture(event.pointerId);
+    entries.classList.remove('is-dragging');
+    if (composePointerPressed && !dragging) openForm();
+    composePointerPressed = false;
+    if (dragging) {
+      suppressClick = true;
+      setTimeout(() => { suppressClick = false; }, 0);
+    }
+  };
+  entries.addEventListener('pointerup', endDrag);
+  entries.addEventListener('pointercancel', endDrag);
+  const showAll = () => {
+    const container = $('#guestbookAllEntries');
+    if (!container) return;
+    container.replaceChildren();
+    if (!guestbookEntries.length) {
+      const empty = document.createElement('p');
+      empty.className = 'guestbook-state';
+      empty.textContent = '아직 작성된 방명록이 없습니다.';
+      container.append(empty);
+    }
+    guestbookEntries.forEach(entry => {
+      const item = document.createElement('article');
+      item.className = 'guestbook-entry';
+      const decoration = document.createElement('div');
+      decoration.className = 'guestbook-note-decoration';
+      decoration.innerHTML = '<span aria-hidden="true">✽</span>';
+      const message = document.createElement('p');
+      message.textContent = entry.message;
+      const name = document.createElement('strong');
+      name.textContent = `- ${entry.name} -`;
+      item.append(decoration, message, name);
+      container.append(item);
+    });
+    $('#guestbookAllDialog')?.showModal();
+  };
+  entries.addEventListener('click', event => {
+    if (suppressClick) {
+      event.preventDefault();
+      return;
+    }
+    if (event.target.closest('[data-guestbook-compose]')) openForm();
+  });
+  $('#guestbookWrite')?.addEventListener('click', openForm);
+  $('#guestbookAll')?.addEventListener('click', showAll);
+  $('#guestbookAllClose')?.addEventListener('click', () => $('#guestbookAllDialog')?.close());
+  if (!isFirebaseConfigured) {
+    renderGuestbookEntries([]);
+    entries.querySelector('[data-guestbook-compose]').disabled = true;
+    entries.querySelector('[data-guestbook-compose]').textContent = '방명록 준비 중';
+    return;
+  }
+  $('#guestbookCancel')?.addEventListener('click', () => {
+    closeForm();
+  });
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const name = $('#guestbookName').value.trim(), message = $('#guestbookMessage').value.trim();
+    if (!name || !message) return;
+    const submit = form.querySelector('[type="submit"]');
+    submit.disabled = true;
+    try {
+      await addGuestbookEntry({ name, message });
+      closeForm();
+      toast('축하 메시지를 남겼어요.');
+    } catch (error) {
+      console.error(error);
+      toast('메시지를 남기지 못했어요. 잠시 후 다시 시도해 주세요.');
+    } finally { submit.disabled = false; }
+  });
+  try {
+    subscribeGuestbook(renderGuestbookEntries, error => {
+      console.error(error);
+      entries.innerHTML = '<p class="guestbook-state">방명록을 불러오지 못했어요.</p>';
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function setup(d) { $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); }
 let __countdownTimer = null;
 function setupCountdown() {
   const el = $('#countdown');
