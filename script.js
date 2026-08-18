@@ -24,7 +24,7 @@ function page(d) {
 <section class="section story reveal"><p class="section-label">OUR STORY</p><h2>우리의 시간</h2><ol class="timeline">${(d.story || []).map(x => `<li><time>${esc(x.year)}</time><div><h3>${esc(x.title)}</h3><p>${esc(x.description)}</p></div></li>`).join('')}</ol></section>
 <section class="section gallery-section reveal"><p class="section-label">GALLERY</p><h2>우리의 순간</h2><div class="gallery">${gallery.map((x, i) => `<button class="gallery-item" data-index="${i}" aria-label="${i + 1}번째 사진 크게 보기"><img src="${esc(x.src)}" alt="${esc(x.alt)}" loading="lazy"></button>`).join('')}</div></section>
 <section class="section info reveal"><p class="section-label">WEDDING DAY</p><h2>${esc(when.display)}<br>${esc(when.weekday)} ${esc(when.time)}</h2>${weddingCalendar(when)}<strong class="dday">${ddaySentence(w.date, c.groom, c.bride)}</strong><div class="countdown" id="countdown" data-target="${esc(w.date)}"><div class="countdown-unit"><span class="countdown-value" data-unit="days">00</span><small>DAYS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="hours">00</span><small>HRS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="minutes">00</span><small>MIN</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="seconds">00</span><small>SEC</small></div></div></section>
-<section class="section location reveal"><p class="section-label">LOCATION</p><h2>오시는 길</h2><div id="naverMap" class="map" role="img" aria-label="${esc(d.location?.mapAlt || `${w.venue || '예식장'} 주변 지도`)}"><noscript><img class="map" src="${esc(d.location?.mapImage)}" alt="${esc(d.location?.mapAlt || `${w.venue || '예식장'} 주변 약도`)}"></noscript></div><p class="address">${esc(w.address)}</p><div class="link-row"><a href="${esc(d.location?.mapUrl || '#')}" target="_blank" rel="noopener">지도 보기</a><a href="${esc(d.location?.directionsUrl || '#')}" target="_blank" rel="noopener">길찾기</a></div><div class="transit">${(d.location?.transit || []).map(x => `<p><b>${esc(x.label)}</b><span>${esc(x.text)}</span></p>`).join('')}</div></section>
+<section class="section location reveal"><p class="section-label">LOCATION</p><h2>오시는 길</h2><div id="naverMap" class="map" role="img" aria-label="${esc(d.location?.mapAlt || `${w.venue || '예식장'} 주변 지도`)}"><noscript><img class="map" src="${esc(d.location?.mapImage)}" alt="${esc(d.location?.mapAlt || `${w.venue || '예식장'} 주변 약도`)}"></noscript></div><div class="map-nav-buttons"><button type="button" class="map-nav-button" data-nav="naver"><img class="map-nav-icon" src="assets/icons/naver.png" alt="" loading="lazy"><span>네이버지도</span></button><button type="button" class="map-nav-button" data-nav="kakao"><img class="map-nav-icon" src="assets/icons/kakao.png" alt="" loading="lazy"><span>카카오맵</span></button><button type="button" class="map-nav-button" data-nav="tmap"><img class="map-nav-icon" src="assets/icons/tmap.png" alt="" loading="lazy"><span>티맵</span></button></div><p class="address">${esc(w.address)}</p><div class="transit">${(d.location?.transit || []).map(x => `<p><b>${esc(x.label)}</b><span>${esc(x.text)}</span></p>`).join('')}</div></section>
 <section class="section accounts reveal"><p class="section-label">WITH LOVE</p><h2>마음 전하실 곳</h2><div class="account-list">${(d.accounts || []).map((group, groupIndex) => `<details class="account-group"><summary><span>${esc(group.side)} 계좌번호</span></summary><div class="account-items"><div class="account-items-inner">${(group.accounts || []).map((account, accountIndex) => `<article class="account-item"><div><h3>${esc(account.holder)}</h3><p>${esc(account.bank)} <b>${esc(account.number)}</b></p></div><button class="copy-button" data-group="${groupIndex}" data-account="${accountIndex}" aria-label="${esc(account.relation)} 계좌번호 복사"><span class="copy-icon">⧉</span>복사</button></article>`).join('')}</div></div></details>`).join('')}</div></section>
 <section class="section guestbook reveal"><p class="section-label">GUESTBOOK</p><h2>축하의 마음을<br>남겨주세요</h2><p>정성스러운 마음으로 준비 중인 공간입니다.</p><button id="guestbookButton" class="outline-button">축하 메시지 남기기</button></section>
 <footer class="thanks reveal"><span>Thank you for celebrating with us</span><h2>${esc(c.groom)} <i>&amp;</i> ${esc(c.bride)}</h2><p>${esc(when.display)}</p></footer>`;
@@ -62,7 +62,7 @@ function setupAccordion() {
   });
 }
 
-function setup(d) { $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-item').forEach(b => b.addEventListener('click', () => openLightbox(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); $('#guestbookButton').addEventListener('click', () => toast('방명록은 따뜻하게 준비 중이에요.')); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); }
+function setup(d) { $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-item').forEach(b => b.addEventListener('click', () => openLightbox(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); $('#guestbookButton').addEventListener('click', () => toast('방명록은 따뜻하게 준비 중이에요.')); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); }
 let __countdownTimer = null;
 function setupCountdown() {
   const el = $('#countdown');
@@ -109,10 +109,44 @@ function setupMap(loc) {
   const map = new naver.maps.Map(el, {
     center: position,
     zoom: loc.zoom || 17,
-    zoomControl: true,
+    zoomControl: false,
     zoomControlOptions: { position: naver.maps.Position.TOP_RIGHT }
   });
   new naver.maps.Marker({ position, map, title: loc.mapAlt || '' });
+}
+
+function openMapNav(service, loc, venueName) {
+  const lat = Number(loc?.lat), lng = Number(loc?.lng);
+  if (Number.isNaN(lat) || Number.isNaN(lng)) return toast('위치 정보가 없습니다.');
+  const name = encodeURIComponent(venueName || '예식장');
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+  const appName = encodeURIComponent(location.hostname || 'wedding-card');
+  const targets = {
+    naver: {
+      app: `nmap://route/public?dlat=${lat}&dlng=${lng}&dname=${name}&appname=${appName}`,
+      store: isIOS ? 'https://apps.apple.com/kr/app/naver-map-navigation/id311867728' : 'https://play.google.com/store/apps/details?id=com.nhn.android.nmap',
+      web: `https://map.naver.com/p/search/${name}`
+    },
+    kakao: {
+      app: `kakaomap://route?ep=${lat},${lng}&by=CAR`,
+      store: isIOS ? 'https://apps.apple.com/kr/app/id304608425' : 'https://play.google.com/store/apps/details?id=net.daum.android.map',
+      web: `https://map.kakao.com/link/to/${name},${lat},${lng}`
+    },
+    tmap: {
+      app: `tmap://route?goalname=${name}&goalx=${lng}&goaly=${lat}`,
+      store: isIOS ? 'https://apps.apple.com/kr/app/id431589174' : 'https://play.google.com/store/apps/details?id=com.skt.tmap.ku',
+      web: null
+    }
+  };
+  const target = targets[service];
+  if (!target) return;
+  if (!isIOS && !isAndroid) { window.open(target.web || target.store, '_blank', 'noopener'); return; }
+  const fallback = target.web || target.store;
+  const timer = setTimeout(() => { if (!document.hidden) location.href = fallback; }, 1500);
+  window.addEventListener('pagehide', () => clearTimeout(timer), { once: true });
+  location.href = target.app;
 }
 
 function setupAudio(music) { const btn = $('#musicButton'); if (!music?.enabled || !music.src) { btn.hidden = true; return; } audio = new Audio(music.src); audio.loop = true; audio.volume = .35; const update = playing => { btn.textContent = playing ? 'Ⅱ' : '♪'; btn.setAttribute('aria-label', playing ? '배경 음악 일시 정지' : '배경 음악 재생'); btn.setAttribute('aria-pressed', playing); }; audio.addEventListener('play', () => update(true)); audio.addEventListener('pause', () => update(false)); audio.addEventListener('error', () => { btn.hidden = true; }); audio.play().catch(() => update(false)); btn.addEventListener('click', () => audio.paused ? audio.play().catch(() => toast('음악을 재생할 수 없습니다.')) : audio.pause()); }

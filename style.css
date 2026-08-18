@@ -434,6 +434,47 @@ body {
   display: block
 }
 
+.map-nav-buttons {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 22px
+}
+
+.map-nav-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 6px;
+  border: 1px solid #e2dbcb;
+  border-radius: 10px;
+  background: #fffdf9;
+  color: var(--color-text);
+  font: 500 12.5px var(--sans);
+  cursor: pointer;
+  white-space: nowrap
+}
+
+.map-nav-button svg,
+.map-nav-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  object-fit: cover
+}
+
+.map-nav-button span {
+  position: relative;
+  top: -1px
+}
+
+.map-nav-button:active {
+  transform: scale(.96)
+}
+
 .address {
   margin: 18px 0;
   color: #65574c
