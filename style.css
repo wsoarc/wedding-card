@@ -156,6 +156,12 @@ body {
   margin: 0 0 13px
 }
 
+/* title(h2)이 없는 섹션은 section-label 바로 다음이 본문이므로,
+   그 경우에도 title이 있을 때와 동일한 간격이 생기도록 처리 */
+.section-label:not(:has(+ h2)) {
+  margin-bottom: 32px
+}
+
 .hero h1,
 .section h2,
 .thanks h2 {
@@ -218,7 +224,7 @@ body {
 .section h2 {
   font-size: 27px;
   line-height: 1.5;
-  margin: 0 0 31px;
+  margin: 0 0 32px;
   letter-spacing: .02em
 }
 
@@ -376,7 +382,7 @@ body {
 
 .info h2 {
   font-size: 24px;
-  margin-bottom: 28px
+  margin-bottom: 32px
 }
 
 .wedding-day-time {

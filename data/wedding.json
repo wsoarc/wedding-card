@@ -25,7 +25,6 @@
   },
   "invitation": {
     "label": "INVITATION",
-    "title": "저희, 결혼합니다",
     "paragraphs": [
       "서로 다른 계절을 지나온 두 사람이",
       "이제는 같은 곳을 바라보며 함께 걸어가려 합니다.",
@@ -56,7 +55,6 @@
   ],
   "gallery": {
     "label": "GALLERY",
-    "title": "우리의 순간",
     "images": [
       {
         "src": "assets/images/gallery-01.svg",
@@ -86,7 +84,6 @@
   },
   "location": {
     "label": "LOCATION",
-    "title": "오시는 길",
     "lat": 37.5665,
     "lng": 126.9780,
     "zoom": 17,
@@ -110,7 +107,6 @@
   },
   "accounts": {
     "label": "ACCOUNTS",
-    "title": "마음 전하실 곳",
     "groups": [
       {
         "side": "신랑측",
@@ -164,8 +160,7 @@
     "label": "WEDDING DAY"
   },
   "guestbook": {
-    "label": "GUESTBOOK",
-    "title": "방명록"
+    "label": "GUESTBOOK"
   },
   "typography": {
     "hero": {
