@@ -54,33 +54,39 @@
       "description": "따뜻한 축복 속에서 새로운 첫걸음을 내딛습니다."
     }
   ],
-  "gallery": [
-    {
-      "src": "assets/images/gallery-01.svg",
-      "alt": "따뜻한 햇살 아래의 부케"
-    },
-    {
-      "src": "assets/images/gallery-02.svg",
-      "alt": "정원에서 함께 걷는 두 사람"
-    },
-    {
-      "src": "assets/images/gallery-03.svg",
-      "alt": "꽃과 반지의 작은 순간"
-    },
-    {
-      "src": "assets/images/gallery-04.svg",
-      "alt": "창가의 신부 실루엣"
-    },
-    {
-      "src": "assets/images/gallery-05.svg",
-      "alt": "축하의 테이블 플라워"
-    },
-    {
-      "src": "assets/images/gallery-06.svg",
-      "alt": "노을빛 아래 두 사람"
-    }
-  ],
+  "gallery": {
+    "label": "GALLERY",
+    "title": "우리의 순간",
+    "images": [
+      {
+        "src": "assets/images/gallery-01.svg",
+        "alt": "따뜻한 햇살 아래의 부케"
+      },
+      {
+        "src": "assets/images/gallery-02.svg",
+        "alt": "정원에서 함께 걷는 두 사람"
+      },
+      {
+        "src": "assets/images/gallery-03.svg",
+        "alt": "꽃과 반지의 작은 순간"
+      },
+      {
+        "src": "assets/images/gallery-04.svg",
+        "alt": "창가의 신부 실루엣"
+      },
+      {
+        "src": "assets/images/gallery-05.svg",
+        "alt": "축하의 테이블 플라워"
+      },
+      {
+        "src": "assets/images/gallery-06.svg",
+        "alt": "노을빛 아래 두 사람"
+      }
+    ]
+  },
   "location": {
+    "label": "LOCATION",
+    "title": "오시는 길",
     "lat": 37.5665,
     "lng": 126.9780,
     "zoom": 17,
@@ -102,54 +108,65 @@
       }
     ]
   },
-  "accounts": [
-    {
-      "side": "신랑측",
-      "accounts": [
-        {
-          "relation": "신랑",
-          "bank": "더미은행",
-          "number": "000-0000-0000",
-          "holder": "도윤"
-        },
-        {
-          "relation": "신랑 아버지",
-          "bank": "더미은행",
-          "number": "000-0000-0001",
-          "holder": "김다정"
-        },
-        {
-          "relation": "신랑 어머니",
-          "bank": "더미은행",
-          "number": "000-0000-0002",
-          "holder": "이온유"
-        }
-      ]
-    },
-    {
-      "side": "신부측",
-      "accounts": [
-        {
-          "relation": "신부",
-          "bank": "더미은행",
-          "number": "000-0000-0010",
-          "holder": "서윤"
-        },
-        {
-          "relation": "신부 아버지",
-          "bank": "더미은행",
-          "number": "000-0000-0011",
-          "holder": "박하늘"
-        },
-        {
-          "relation": "신부 어머니",
-          "bank": "더미은행",
-          "number": "000-0000-0012",
-          "holder": "최봄"
-        }
-      ]
-    }
-  ],
+  "accounts": {
+    "label": "ACCOUNTS",
+    "title": "마음 전하실 곳",
+    "groups": [
+      {
+        "side": "신랑측",
+        "accounts": [
+          {
+            "relation": "신랑",
+            "bank": "더미은행",
+            "number": "000-0000-0000",
+            "holder": "도윤"
+          },
+          {
+            "relation": "신랑 아버지",
+            "bank": "더미은행",
+            "number": "000-0000-0001",
+            "holder": "김다정"
+          },
+          {
+            "relation": "신랑 어머니",
+            "bank": "더미은행",
+            "number": "000-0000-0002",
+            "holder": "이온유"
+          }
+        ]
+      },
+      {
+        "side": "신부측",
+        "accounts": [
+          {
+            "relation": "신부",
+            "bank": "더미은행",
+            "number": "000-0000-0010",
+            "holder": "서윤"
+          },
+          {
+            "relation": "신부 아버지",
+            "bank": "더미은행",
+            "number": "000-0000-0011",
+            "holder": "박하늘"
+          },
+          {
+            "relation": "신부 어머니",
+            "bank": "더미은행",
+            "number": "000-0000-0012",
+            "holder": "최봄"
+          }
+        ]
+      }
+    ]
+  },
+  "weddingDay": {
+    "label": "WEDDING DAY"
+  },
+  "guestbook": {
+    "label": "GUESTBOOK",
+    "title": "방명록"
+  },
   "typography": {
     "hero": {
       "fontFamily": "serif",
