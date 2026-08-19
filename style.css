@@ -51,6 +51,75 @@ body {
   color: var(--color-muted)
 }
 
+.loading-envelope {
+  width: 64px;
+  height: 48px;
+  animation: envelope-float 2.2s ease-in-out infinite
+}
+
+.loading-envelope .envelope-flap {
+  transform-origin: 32px 4px;
+  animation: envelope-flap 2.2s ease-in-out infinite
+}
+
+.loading-envelope .envelope-heart {
+  transform-origin: 32px 30px;
+  animation: envelope-heart 2.2s ease-in-out infinite
+}
+
+@keyframes envelope-float {
+
+  0%,
+  100% {
+    transform: translateY(0)
+  }
+
+  50% {
+    transform: translateY(-4px)
+  }
+}
+
+@keyframes envelope-flap {
+
+  0%,
+  30% {
+    transform: translateY(0);
+    opacity: 1
+  }
+
+  55%,
+  80% {
+    transform: translateY(-3px);
+    opacity: .35
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1
+  }
+}
+
+@keyframes envelope-heart {
+
+  0%,
+  45% {
+    opacity: 0;
+    transform: translateY(4px) scale(.8)
+  }
+
+  60%,
+  75% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1)
+  }
+
+  90%,
+  100% {
+    opacity: 0;
+    transform: translateY(4px) scale(.8)
+  }
+}
+
 .hero {
   position: relative;
   padding: 0;
