@@ -52,6 +52,50 @@ access page to [wedding-card](https://wsoarc.github.io/wedding-card/)
 - Client ID가 비어있거나 스크립트 로드에 실패하면 `wedding.json`의 `mapImage`(정적 이미지)로 자동 폴백됩니다.
 - Client ID를 공개 저장소에 커밋해도 되는지 걱정된다면, 콘솔의 `Web 서비스 URL` 등록으로 허용 도메인이 제한되어 있어 타 도메인에서의 무단 사용은 차단됩니다.
 
+## 문구별 폰트 / 크기 설정
+
+`wedding.json`의 `typography` 항목에서 각 문구 영역별로 글꼴(`fontFamily`)과 크기(`fontSize`) 등을 지정할 수 있습니다. 페이지가 로드될 때 이 값들이 읽혀 해당 영역에 자동으로 적용됩니다 (`script.js`의 `applyTypography` 함수).
+
+```json
+"typography": {
+  "hero": { "fontFamily": "script", "fontSize": "26px" },
+  "sectionTitle": { "fontFamily": "serif", "fontSize": "27px" },
+  "body": { "fontFamily": "myeongjo", "fontSize": "16px" }
+}
+```
+
+- `fontFamily`: 아래 프리셋 중 하나를 쓰거나, 구글 폰트 등 원하는 글꼴 이름을 그대로 문자열로 넣을 수 있습니다. 새 폰트를 쓰려면 `index.html`의 `<link href="https://fonts.googleapis.com/css2?...">` 줄에 해당 글꼴도 함께 불러와야 합니다.
+- `fontSize`: `"18px"`처럼 단위 포함 문자열.
+- 그 외 `fontWeight`, `lineHeight`, `letterSpacing`, `color`도 선택적으로 지정 가능합니다.
+- 값을 비워두면(`{}`) 해당 카테고리는 `style.css`의 기본 디자인이 그대로 유지됩니다. 한 카테고리는 여러 요소를 함께 묶은 것이라, 값을 지정하면 그 안의 모든 요소에 동일하게 적용됩니다.
+
+### 폰트 프리셋 (모바일 청첩장에서 자주 쓰이는 글씨체)
+
+| 프리셋 키 | 실제 폰트 | 분위기 |
+| --- | --- | --- |
+| `serif` | Gowun Batang | 차분하고 단정한 한글 명조. 기본 세리프 |
+| `myeongjo` | Nanum Myeongjo | 전통적이고 격식 있는 명조체. 가독성 좋아 본문에 적합 |
+| `thin` | Song Myung | 가늘고 우아한 세리프. 숫자·날짜처럼 짧은 문구에 포인트로 어울림 |
+| `dodum` | Gowun Dodum | 부드럽고 둥근 고딕. 편안하고 따뜻한 느낌 |
+| `sans` | Pretendard | 깔끔한 기본 고딕. 라벨이나 정보성 텍스트에 적합 |
+| `script` | Parisienne | 우아한 영문 필기체. 한글엔 자동으로 다른 폰트로 대체되므로 영문·숫자 포인트용 |
+| `handwriting` | Gamja Flower | 귀엽고 따뜻한 손글씨. 방명록처럼 친근한 느낌을 줄 때 |
+
+### 카테고리별 기본 적용 폰트
+
+각 카테고리에는 분위기가 어울리는 폰트를 기본으로 지정해뒀습니다. 마음에 들지 않으면 `wedding.json`에서 자유롭게 바꿀 수 있습니다.
+
+| 키 | 적용 위치 | 기본 폰트 | 이유 |
+| --- | --- | --- | --- |
+| `hero` | 첫 화면 제목·이름·날짜·예식장명 | `script` | 첫인상을 우아하게 장식하는 필기체 포인트 |
+| `sectionLabel` | 각 섹션 상단 라벨(INVITATION, GALLERY 등) | `sans` | 짧은 영문 라벨은 깔끔한 고딕이 잘 읽힘 |
+| `sectionTitle` | 각 섹션 제목(h2), 마지막 인사 이름 | `serif` | 단정한 명조로 제목의 무게감 유지 |
+| `body` | 초대의 글, 혼주 이름, 주소, 오시는 길, 계좌 정보, D-day 문구 | `myeongjo` | 격식 있고 가독성 좋은 명조로 본문 안정감 |
+| `countdown` | 카운트다운 숫자 | `thin` | 가는 세리프로 숫자가 세련되게 보임 |
+| `story` | 스토리(타임라인) 연도·제목·설명 | `dodum` | 둥글고 부드러운 고딕으로 편안한 서술 느낌 |
+| `guestbook` | 방명록 메시지·작성자 이름 | `handwriting` | 손글씨체로 진짜 방명록처럼 친근하게 |
+| `thanks` | 마지막 인사 라벨·날짜 | `serif` | hero·제목과 통일감 있는 마무리 |
+
 ## Firebase 방명록 설정
 
 방명록은 Cloud Firestore에 `이름`, `메시지`, `작성 시각`을 저장하고 최근 20개를 실시간으로 표시합니다. 방문자에게는 수정·삭제 기능을 제공하지 않으며, 부적절한 글은 Firebase Console에서 삭제할 수 있습니다.

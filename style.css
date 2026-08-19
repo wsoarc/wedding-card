@@ -10,7 +10,8 @@
   --radius-sm: 8px;
   --radius-md: 18px;
   --serif: 'Gowun Batang', 'Nanum Myeongjo', serif;
-  --sans: Pretendard, Arial, sans-serif
+  --sans: Pretendard, Arial, sans-serif;
+  --script: 'Parisienne', cursive
 }
 
 * {
@@ -146,10 +147,12 @@ body {
 
 .eyebrow,
 .section-label {
-  font-size: 18px;
-  letter-spacing: .2em;
+  font-family: var(--script);
+  font-size: 32px;
+  letter-spacing: .03em;
   color: var(--color-accent);
-  font-weight: 600;
+  font-weight: 400;
+  text-transform: none;
   margin: 0 0 13px
 }
 

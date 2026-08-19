@@ -148,6 +148,37 @@
       ]
     }
   ],
+  "typography": {
+    "hero": {
+      "fontFamily": "serif",
+      "fontSize": "16px"
+    },
+    "sectionLabel": {
+      "fontFamily": "serif",
+      "fontSize": "16px",
+      "letterSpacing": "0.22em"
+    },
+    "sectionTitle": {
+      "fontFamily": "serif"
+    },
+    "body": {
+      "fontFamily": "serif"
+    },
+    "countdown": {
+      "fontFamily": "thin",
+      "letterSpacing": "0.04em"
+    },
+    "story": {
+      "fontFamily": "dodum"
+    },
+    "guestbook": {
+      "fontFamily": "handwriting",
+      "fontSize": "16px"
+    },
+    "thanks": {
+      "fontFamily": "serif"
+    }
+  },
   "music": {
     "enabled": true,
     "src": "assets/audio/wedding-music.wav",

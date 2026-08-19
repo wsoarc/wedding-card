@@ -12,6 +12,51 @@ document.addEventListener('touchend', e => {
   __lastTouchEnd = now;
 }, { passive: false });
 
+// --- 문구별 폰트/크기 커스터마이징: wedding.json의 "typography" 값을 읽어 각 영역에 적용 ---
+const TYPOGRAPHY_MAP = {
+  hero: '.hero h1, .hero-names, .hero-names time, .hero-date, .hero-venue',
+  sectionLabel: '.section-label, .eyebrow',
+  sectionTitle: '.section h2, .info h2, .thanks h2',
+  body: '.prose, .invitation-parents, .address, .transit b, .transit span, .account-list h3, .account-list p, .account-group summary, .dday',
+  countdown: '.countdown-value',
+  story: '.timeline time, .timeline h3, .timeline p',
+  guestbook: '.guestbook-entry p, .guestbook-entry strong',
+  thanks: '.thanks span, .thanks p'
+};
+// 프리셋: index.html에 이미 불러온, 모바일 청첩장에서 자주 쓰이는 구글 폰트들. 새 폰트를 추가하려면 index.html의 <link href="https://fonts.googleapis.com/css2?...">에도 함께 추가해야 합니다.
+const FONT_PRESETS = {
+  serif: 'var(--serif)',                // 차분하고 단정한 한글 명조 - 기본 세리프 (Gowun Batang)
+  myeongjo: "'Nanum Myeongjo', serif",  // 전통적인 느낌의 명조체 - 격식 있는 본문에 어울림
+  thin: "'Song Myung', serif",          // 가늘고 우아한 세리프 - 숫자·날짜·짧은 문구에 어울림
+  dodum: "'Gowun Dodum', sans-serif",   // 부드럽고 둥근 고딕 - 편안한 느낌의 본문/설명
+  sans: 'var(--sans)',                  // 깔끔한 기본 고딕 (Pretendard)
+  script: "'Parisienne', cursive",      // 우아한 영문 필기체 - 포인트 강조용(한글엔 자동 대체)
+  handwriting: "'Gamja Flower', cursive" // 귀엽고 따뜻한 손글씨 - 방명록 등 친근한 느낌
+};
+function applyTypography(typography = {}) {
+  let css = '';
+  Object.entries(typography).forEach(([key, rules]) => {
+    const selector = TYPOGRAPHY_MAP[key];
+    if (!selector || !rules || typeof rules !== 'object') return;
+    const decls = [];
+    if (rules.fontFamily) decls.push(`font-family: ${FONT_PRESETS[rules.fontFamily] || `'${rules.fontFamily}', var(--sans)`} !important`);
+    if (rules.fontSize) decls.push(`font-size: ${rules.fontSize} !important`);
+    if (rules.fontWeight) decls.push(`font-weight: ${rules.fontWeight} !important`);
+    if (rules.lineHeight) decls.push(`line-height: ${rules.lineHeight} !important`);
+    if (rules.letterSpacing) decls.push(`letter-spacing: ${rules.letterSpacing} !important`);
+    if (rules.color) decls.push(`color: ${rules.color} !important`);
+    if (!decls.length) return;
+    css += `${selector} { ${decls.join('; ')}; }\n`;
+  });
+  let styleTag = document.getElementById('dynamic-typography');
+  if (!styleTag) {
+    styleTag = document.createElement('style');
+    styleTag.id = 'dynamic-typography';
+    document.head.append(styleTag);
+  }
+  styleTag.textContent = css;
+}
+
 const $ = (s, p = document) => p.querySelector(s);
 const esc = (value = '') => String(value).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 let data, gallery = [], activeImage = 0, audio, guestbookEntries = [];
@@ -226,7 +271,7 @@ function setupGuestbook() {
   }
 }
 
-function setup(d) { $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); }
+function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); }
 let __countdownTimer = null;
 function setupCountdown() {
   const el = $('#countdown');
