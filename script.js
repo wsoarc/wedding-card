@@ -1,16 +1,36 @@
 import { addGuestbookEntry, isFirebaseConfigured, subscribeGuestbook } from './firebase-guestbook.js';
 
-// --- 확대(줌) 억제: 핀치줌(Safari gesture), 더블탭 줌, Ctrl+휠 줌 차단 ---
-['gesturestart', 'gesturechange', 'gestureend'].forEach(evt =>
-  document.addEventListener(evt, e => e.preventDefault())
-);
+// --- 확대(줌) 억제: 핀치줌·빠른 멀티터치 차단은 index.html head에서 이미 최대한 빨리 등록해둠 ---
+// 더블탭 줌 차단: 실제 iOS 더블탭 줌은 "같은 지점"을 500ms 안에 두 번 탭했을 때만 발생하므로,
+// 시간뿐 아니라 위치(거리)도 같이 확인해야 함. 안 그러면 갤러리 썸네일을 빠르게 연속으로
+// 탭할 때(다른 지점, 짧은 간격) 오탐되어 클릭이 씹히는 문제가 생김.
 document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
 let __lastTouchEnd = 0;
+let __lastTouchX = 0;
+let __lastTouchY = 0;
 document.addEventListener('touchend', e => {
   const now = Date.now();
-  if (now - __lastTouchEnd <= 300) e.preventDefault();
+  const touch = e.changedTouches && e.changedTouches[0];
+  const x = touch ? touch.clientX : 0;
+  const y = touch ? touch.clientY : 0;
+  const dx = x - __lastTouchX;
+  const dy = y - __lastTouchY;
+  const isSameSpot = Math.hypot(dx, dy) < 25; // 같은 지점(25px 이내)일 때만 더블탭으로 간주
+  if (now - __lastTouchEnd <= 500 && isSameSpot) e.preventDefault();
   __lastTouchEnd = now;
+  __lastTouchX = x;
+  __lastTouchY = y;
 }, { passive: false });
+
+// --- 사진 확대 전용 차단: 갤러리/히어로 이미지는 롱프레스 저장/드래그까지 추가로 차단 ---
+function blockImageZoom() {
+  document.querySelectorAll('.hero-illustration img, .gallery-featured img, .gallery-thumb img')
+    .forEach(img => {
+      if (img.__zoomBlocked) return;
+      img.__zoomBlocked = true;
+      img.addEventListener('dragstart', e => e.preventDefault());
+    });
+}
 
 // --- 문구별 폰트/크기 커스터마이징: wedding.json의 "typography" 값을 읽어 각 영역에 적용 ---
 const TYPOGRAPHY_MAP = {
@@ -281,7 +301,7 @@ function setupGuestbook() {
   }
 }
 
-function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.groups?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); }
+function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.groups?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); blockImageZoom(); }
 let __countdownTimer = null;
 function setupCountdown() {
   const el = $('#countdown');
