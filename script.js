@@ -32,6 +32,51 @@ function blockImageZoom() {
     });
 }
 
+// --- 좌우 스크롤 슬라이더 공통: 내용이 화면 폭을 넘어갈 때만 화살표를 보여주고, 누르면 다음/이전 아이템 경계로 정확히 이동 ---
+function setupSlider(wrapSelector, scrollSelector) {
+  const wrap = document.querySelector(wrapSelector);
+  const scrollEl = document.querySelector(scrollSelector);
+  if (!wrap || !scrollEl) return;
+  const prevBtn = wrap.querySelector('.slider-nav-prev');
+  const nextBtn = wrap.querySelector('.slider-nav-next');
+  if (!prevBtn || !nextBtn) return;
+
+  const maxScroll = () => scrollEl.scrollWidth - scrollEl.clientWidth;
+
+  // 고정폭만큼 scrollBy 하면 남은 거리가 애매하게 남아 아이템 중간에서 멈춰 여백이 보일 수 있어서,
+  // 항상 실제 아이템의 시작 위치(offsetLeft)로 스크롤을 맞춰서 절대 어중간한 위치에 멈추지 않게 함.
+  const goTo = dir => {
+    const positions = Array.from(scrollEl.children).map(el => el.offsetLeft);
+    const current = scrollEl.scrollLeft;
+    const end = maxScroll();
+    let target;
+    if (dir > 0) {
+      target = positions.find(pos => pos > current + 2);
+      target = target === undefined ? end : Math.min(target, end);
+    } else {
+      target = [...positions].reverse().find(pos => pos < current - 2);
+      target = target === undefined ? 0 : Math.max(target, 0);
+    }
+    scrollEl.scrollTo({ left: target, behavior: 'smooth' });
+  };
+
+  const update = () => {
+    const hasOverflow = scrollEl.scrollWidth > scrollEl.clientWidth + 1;
+    wrap.classList.toggle('has-overflow', hasOverflow);
+    if (!hasOverflow) return;
+    const end = maxScroll();
+    prevBtn.disabled = scrollEl.scrollLeft <= 1;
+    nextBtn.disabled = scrollEl.scrollLeft >= end - 1;
+  };
+
+  prevBtn.addEventListener('click', () => goTo(-1));
+  nextBtn.addEventListener('click', () => goTo(1));
+  scrollEl.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  new MutationObserver(update).observe(scrollEl, { childList: true });
+  update();
+}
+
 // --- 문구별 폰트/크기 커스터마이징: wedding.json의 "typography" 값을 읽어 각 영역에 적용 ---
 const TYPOGRAPHY_MAP = {
   hero: '.hero h1, .hero-names, .hero-names time, .hero-date, .hero-venue',
@@ -100,10 +145,10 @@ function page(d) {
 <header class="hero"><div class="hero-frame"><div class="hero-illustration"><img src="${esc(d.hero?.image)}" alt="${esc(d.hero?.alt)}" onerror="this.parentElement.classList.add('image-error')"></div><div class="hero-copy"><div class="hero-names"><span>${esc(c.groom)}</span><time><b>${esc(when.month)}</b><i></i><b>${esc(when.day)}</b></time><span>${esc(c.bride)}</span></div><p class="hero-date">${esc(when.year)}.${esc(when.month)}.${esc(when.day)} ${esc(when.weekday).slice(0, 1).toUpperCase()}. ${esc(when.time)}</p><p class="hero-venue">${esc(w.venue)} ${esc(w.hall)}</p></div></div></header>
 <section class="section invitation reveal">${tag('p', 'section-label', invitation.label)}${tag('h2', '', invitation.title)}<div class="prose">${(invitation.paragraphs || []).map(p => `<p>${esc(p)}</p>`).join('')}</div><hr class="invitation-divider"><p class="invitation-parents"><span>${parentsLine(c.groomParents, c.groom)}</span><span>${parentsLine(c.brideParents, c.bride)}</span></p></section>
 <section class="section info reveal">${tag('p', 'section-label', weddingDay.label)}<h2>${esc(when.display)}<br><span class="wedding-day-time">${esc(when.weekday)} ${esc(when.time)}</span></h2>${weddingCalendar(when)}<div class="countdown" id="countdown" data-target="${esc(w.date)}"><div class="countdown-unit"><span class="countdown-value" data-unit="days">00</span><small>DAYS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="hours">00</span><small>HRS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="minutes">00</span><small>MIN</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="seconds">00</span><small>SEC</small></div></div><strong class="dday">${ddaySentence(w.date, givenName(c.groom), givenName(c.bride))}</strong></section>
-<section class="section gallery-section reveal">${tag('p', 'section-label', galleryData.label)}${tag('h2', '', galleryData.title)}<div class="gallery-featured"><img id="galleryFeaturedImg" src="${esc(gallery[0]?.src)}" alt="${esc(gallery[0]?.alt || '')}"></div><div class="gallery-thumbs">${gallery.map((x, i) => `<button type="button" class="gallery-thumb${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="${i + 1}번째 사진 선택"><img src="${esc(x.src)}" alt="${esc(x.alt)}" loading="lazy"></button>`).join('')}</div></section>
+<section class="section gallery-section reveal">${tag('p', 'section-label', galleryData.label)}${tag('h2', '', galleryData.title)}<div class="gallery-featured"><img id="galleryFeaturedImg" src="${esc(gallery[0]?.src)}" alt="${esc(gallery[0]?.alt || '')}"></div><div class="thumbs-slider-wrap"><button type="button" class="slider-nav slider-nav-prev" aria-label="이전 사진 보기">‹</button><div class="gallery-thumbs">${gallery.map((x, i) => `<button type="button" class="gallery-thumb${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="${i + 1}번째 사진 선택"><img src="${esc(x.src)}" alt="${esc(x.alt)}" loading="lazy"></button>`).join('')}</div><button type="button" class="slider-nav slider-nav-next" aria-label="다음 사진 보기">›</button></div></section>
 <section class="section location reveal">${tag('p', 'section-label', location.label)}${tag('h2', '', location.title)}<div id="naverMap" class="map" role="img" aria-label="${esc(location.mapAlt || `${w.venue || '예식장'} 주변 지도`)}"><noscript><img class="map" src="${esc(location.mapImage)}" alt="${esc(location.mapAlt || `${w.venue || '예식장'} 주변 약도`)}"></noscript></div><div class="map-nav-buttons"><button type="button" class="map-nav-button" data-nav="naver"><img class="map-nav-icon" src="assets/icons/naver.png" alt="" loading="lazy"><span>네이버지도</span></button><button type="button" class="map-nav-button" data-nav="kakao"><img class="map-nav-icon" src="assets/icons/kakao.png" alt="" loading="lazy"><span>카카오맵</span></button><button type="button" class="map-nav-button" data-nav="tmap"><img class="map-nav-icon" src="assets/icons/tmap.png" alt="" loading="lazy"><span>티맵</span></button></div><p class="address">${esc(w.address)}</p><div class="transit">${(location.transit || []).map(x => `<p><b>${esc(x.label)}</b><span>${escLines(x.text)}</span></p>`).join('')}</div></section>
 <section class="section accounts reveal">${tag('p', 'section-label', accounts.label)}${tag('h2', '', accounts.title)}<div class="account-list">${accountGroups.map((group, groupIndex) => `<details class="account-group"><summary><span>${esc(group.side)} 계좌번호</span></summary><div class="account-items"><div class="account-items-inner">${(group.accounts || []).map((account, accountIndex) => `<article class="account-item"><div><h3>${esc(account.holder)}</h3><p>${esc(account.bank)} <b>${esc(account.number)}</b></p></div><button class="copy-button" data-group="${groupIndex}" data-account="${accountIndex}" aria-label="${esc(account.relation)} 계좌번호 복사"><span class="copy-icon">⧉</span>복사</button></article>`).join('')}</div></div></details>`).join('')}</div></section>
-<section class="section guestbook reveal">${tag('p', 'section-label', guestbook.label)}${tag('h2', '', guestbook.title)}<div class="guestbook-slider-wrap"><div id="guestbookEntries" class="guestbook-entries" aria-live="polite" aria-label="방명록 목록"><p class="guestbook-state">방명록을 불러오는 중이에요.</p></div></div><div class="guestbook-slider-actions"><button id="guestbookWrite" type="button">✏️작성하기</button><button id="guestbookAll" type="button">📖전체보기</button></div><form id="guestbookForm" class="guestbook-form" hidden><label>이름<input id="guestbookName" name="name" maxlength="20" autocomplete="name" required placeholder="이름을 입력해 주세요"></label><label>축하 메시지<textarea id="guestbookMessage" name="message" maxlength="300" required placeholder="두 분을 위한 축하의 마음을 남겨 주세요"></textarea></label><div class="guestbook-form-actions"><button id="guestbookCancel" class="guestbook-cancel" type="button">취소</button><button class="guestbook-submit" type="submit">남기기</button></div></form><dialog id="guestbookAllDialog" class="guestbook-all-dialog"><div class="guestbook-all-header"><h2>방명록 전체보기</h2><button id="guestbookAllClose" type="button" aria-label="전체보기 닫기">×</button></div><div id="guestbookAllEntries" class="guestbook-all-entries"></div></dialog></section>
+<section class="section guestbook reveal">${tag('p', 'section-label', guestbook.label)}${tag('h2', '', guestbook.title)}<div class="guestbook-slider-wrap"><button type="button" class="slider-nav slider-nav-prev" aria-label="이전 방명록 보기">‹</button><div id="guestbookEntries" class="guestbook-entries" aria-live="polite" aria-label="방명록 목록"><p class="guestbook-state">방명록을 불러오는 중이에요.</p></div><button type="button" class="slider-nav slider-nav-next" aria-label="다음 방명록 보기">›</button></div><div class="guestbook-slider-actions"><button id="guestbookWrite" type="button">✏️작성하기</button><button id="guestbookAll" type="button">📖전체보기</button></div><form id="guestbookForm" class="guestbook-form" hidden><label>이름<input id="guestbookName" name="name" maxlength="20" autocomplete="name" required placeholder="이름을 입력해 주세요"></label><label>축하 메시지<textarea id="guestbookMessage" name="message" maxlength="300" required placeholder="두 분을 위한 축하의 마음을 남겨 주세요"></textarea></label><div class="guestbook-form-actions"><button id="guestbookCancel" class="guestbook-cancel" type="button">취소</button><button class="guestbook-submit" type="submit">남기기</button></div></form><dialog id="guestbookAllDialog" class="guestbook-all-dialog"><div class="guestbook-all-header"><h2>방명록 전체보기</h2><button id="guestbookAllClose" type="button" aria-label="전체보기 닫기">×</button></div><div id="guestbookAllEntries" class="guestbook-all-entries"></div></dialog></section>
 <footer class="thanks reveal"><span>Thank you for celebrating with us</span><h2>${esc(c.groom)} <i>&amp;</i> ${esc(c.bride)}</h2><p>${esc(when.display)}</p></footer>`;
 }
 function setFeaturedImage(index) {
@@ -301,7 +346,7 @@ function setupGuestbook() {
   }
 }
 
-function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.groups?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); blockImageZoom(); }
+function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.groups?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); blockImageZoom(); setupSlider('.thumbs-slider-wrap', '.gallery-thumbs'); setupSlider('.guestbook-slider-wrap', '.guestbook-entries'); }
 let __countdownTimer = null;
 function setupCountdown() {
   const el = $('#countdown');

@@ -822,6 +822,52 @@ body {
   margin: 0 -28px
 }
 
+.thumbs-slider-wrap {
+  position: relative
+}
+
+.slider-nav {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: #463a318c;
+  color: #fffdf9;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  transition: opacity .2s
+}
+
+.thumbs-slider-wrap.has-overflow .slider-nav,
+.guestbook-slider-wrap.has-overflow .slider-nav {
+  display: flex
+}
+
+.slider-nav-prev {
+  left: 4px
+}
+
+.slider-nav-next {
+  right: 4px
+}
+
+.slider-nav:disabled {
+  opacity: 0;
+  pointer-events: none
+}
+
+.slider-nav:active {
+  transform: translateY(-50%) scale(.92)
+}
+
 .guestbook-entries {
   display: flex;
   gap: 10px;
