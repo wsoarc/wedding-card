@@ -22,6 +22,147 @@ document.addEventListener('touchend', e => {
   __lastTouchY = y;
 }, { passive: false });
 
+// --- 히어로 눈 날림 효과: 입자마다 크기·방향·흔들림·소멸 여부를 랜덤하게 줘서 역동적으로 흩날리게 함 ---
+// 입자 모양은 여기서 쉽게 바꿀 수 있습니다. 배열에 여러 개를 넣으면 입자마다 랜덤하게 섞여서 나옵니다.
+// 사용 가능한 값: 'circle'(동그라미) | 'square'(사각형) | 'star'(별) | 'heart'(하트)
+const HERO_SNOW_SHAPES = ['circle'];
+// 입자 색깔도 여기서 바꿀 수 있습니다. '#RRGGBB' 형식으로 넣으면 되고,
+// 여러 개를 넣으면 입자마다 랜덤하게 섞여서 나옵니다. (예: ['#ffffff', '#f6d9c3'])
+const HERO_SNOW_COLORS = ['#ffffff'];
+
+function hexToRgbString(hex) {
+  const clean = hex.replace('#', '');
+  const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+  const num = parseInt(full, 16);
+  return `${(num >> 16) & 255},${(num >> 8) & 255},${num & 255}`;
+}
+
+function drawSnowShape(ctx, shape, x, y, r) {
+  ctx.beginPath();
+  if (shape === 'square') {
+    ctx.rect(x - r, y - r, r * 2, r * 2);
+  } else if (shape === 'star') {
+    const spikes = 5, outerR = r, innerR = r * 0.45;
+    for (let i = 0; i < spikes * 2; i++) {
+      const rad = i % 2 === 0 ? outerR : innerR;
+      const a = (Math.PI / spikes) * i - Math.PI / 2;
+      const px = x + Math.cos(a) * rad, py = y + Math.sin(a) * rad;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  } else if (shape === 'heart') {
+    const s = r / 1.1;
+    ctx.moveTo(x, y + s * .9);
+    ctx.bezierCurveTo(x - s * 1.4, y - s * .4, x - s * .5, y - s * 1.3, x, y - s * .4);
+    ctx.bezierCurveTo(x + s * .5, y - s * 1.3, x + s * 1.4, y - s * .4, x, y + s * .9);
+    ctx.closePath();
+  } else {
+    ctx.arc(x, y, r, 0, Math.PI * 2); // circle (기본값)
+  }
+}
+
+function setupHeroSnow() {
+  const canvas = document.querySelector('.hero-snow');
+  const frame = document.querySelector('.hero-frame');
+  if (!canvas || !frame) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; // 모션 최소화 설정 존중
+
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let particles = [];
+  let width = 0, height = 0;
+  let running = false;
+  let rafId = null;
+
+  const randomParticle = (seedAcrossHeight) => {
+    // 전체적으로는 아래쪽 위주(기준 각도 -35~35도)로 날리되, 매 프레임 각도 자체가 천천히
+    // 출렁여서(dirWobble) 직선으로 뻔하게 떨어지지 않고 자유롭게 흐르는 궤적을 만듦
+    const baseAngle = ((Math.random() * 70) - 35) * Math.PI / 180;
+    const dirWobbleRange = ((Math.random() * 22) + 14) * Math.PI / 180;
+    const speed = Math.random() * 1.1 + 0.7;
+    const fades = Math.random() < 0.4; // 입자 중 40%만 날리는 도중 서서히 사라지는 효과 적용
+    const baseR = Math.random() * 2.6 + 1.4; // 입자 크기: 1.4~4px, 랜덤
+    return {
+      x: Math.random() * width,
+      y: seedAcrossHeight ? Math.random() * height : -10,
+      baseAngle,
+      dir: Math.random() * Math.PI * 2,        // 방향 출렁임 위상(입자마다 다르게 시작)
+      dirSpeed: Math.random() * 0.018 + 0.006,
+      dirWobbleRange,
+      speed,
+      baseR,
+      pulse: Math.random() * Math.PI * 2,       // 멀어졌다 가까워졌다 하는 느낌의 크기 변화 위상
+      pulseSpeed: Math.random() * 0.008 + 0.003,
+      pulseRange: baseR * (Math.random() * 0.35 + 0.2), // 기본 크기의 20~55% 정도 오르내림
+      wobble: Math.random() * Math.PI * 2,      // 좌우 미세 흔들림 위상(방향 출렁임과는 별개, 잔떨림용)
+      wobbleSpeed: Math.random() * 0.02 + 0.006,
+      wobbleRange: Math.random() * 1 + 0.4,
+      baseOpacity: Math.random() * 0.45 + 0.35,
+      fades,
+      life: 0,
+      maxLife: fades ? Math.random() * 130 + 90 : Infinity, // 페이드 입자만 수명을 둬서 다 사라지면 재생성
+      shape: HERO_SNOW_SHAPES[Math.floor(Math.random() * HERO_SNOW_SHAPES.length)],
+      color: hexToRgbString(HERO_SNOW_COLORS[Math.floor(Math.random() * HERO_SNOW_COLORS.length)])
+    };
+  };
+
+  function resize() {
+    const rect = frame.getBoundingClientRect();
+    width = rect.width; height = rect.height;
+    canvas.width = width * dpr; canvas.height = height * dpr;
+    canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function init() {
+    resize();
+    const count = Math.max(26, Math.min(70, Math.round((width * height) / 8500)));
+    particles = Array.from({ length: count }, () => randomParticle(true));
+  }
+
+  function frameStep() {
+    if (!running) return;
+    ctx.clearRect(0, 0, width, height);
+    particles.forEach(p => {
+      p.dir += p.dirSpeed;
+      p.wobble += p.wobbleSpeed;
+      p.pulse += p.pulseSpeed;
+      p.life += 1;
+      // 기준 각도에 출렁임을 더해서 매 프레임 진행 방향이 자유롭게 바뀌는 곡선 궤적을 만듦
+      const angle = p.baseAngle + Math.sin(p.dir) * p.dirWobbleRange;
+      p.y += Math.cos(angle) * p.speed;
+      p.x += Math.sin(angle) * p.speed + Math.sin(p.wobble) * p.wobbleRange * 0.05;
+      const offBottom = p.y > height + 8;
+      const lifeOver = p.fades && p.life >= p.maxLife;
+      if (offBottom || lifeOver) { Object.assign(p, randomParticle(false)); return; }
+      if (p.x < -8) p.x = width + 8; else if (p.x > width + 8) p.x = -8;
+      // 페이드 입자는 등장(0→1)과 소멸(1→0)이 부드럽게 이어지도록 sin 커브로 투명도 계산
+      const opacity = p.fades ? p.baseOpacity * Math.sin(Math.PI * Math.min(p.life / p.maxLife, 1)) : p.baseOpacity;
+      // 멀어졌다 가까워졌다 하는 느낌: 기본 크기를 중심으로 살짝씩 커졌다 작아졌다 반복
+      const r = Math.max(p.baseR + Math.sin(p.pulse) * p.pulseRange, 0.6);
+      drawSnowShape(ctx, p.shape, p.x, p.y, r);
+      ctx.fillStyle = `rgba(${p.color},${Math.max(opacity, 0)})`;
+      ctx.fill();
+    });
+    rafId = requestAnimationFrame(frameStep);
+  }
+
+  function start() { if (running) return; running = true; frameStep(); }
+  function stop() { running = false; if (rafId) cancelAnimationFrame(rafId); rafId = null; }
+
+  init();
+  new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && document.visibilityState === 'visible') start(); else stop();
+    });
+  }, { threshold: 0 }).observe(frame);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') stop();
+    else if (frame.getBoundingClientRect().bottom > 0) start();
+  });
+  window.addEventListener('resize', () => { resize(); });
+}
+
 // --- 사진 확대 전용 차단: 갤러리/히어로 이미지는 롱프레스 저장/드래그까지 추가로 차단 ---
 function blockImageZoom() {
   document.querySelectorAll('.hero-illustration img, .gallery-featured img, .gallery-thumb img')
@@ -79,7 +220,7 @@ function setupSlider(wrapSelector, scrollSelector) {
 
 // --- 문구별 폰트/크기 커스터마이징: wedding.json의 "typography" 값을 읽어 각 영역에 적용 ---
 const TYPOGRAPHY_MAP = {
-  hero: '.hero h1, .hero-names, .hero-names time, .hero-date, .hero-venue',
+  hero: '.hero-headline, .hero-date, .hero-names-line',
   sectionLabel: '.section-label, .eyebrow',
   sectionTitle: '.section h2, .info h2, .thanks h2',
   body: '.prose, .invitation-parents, .address, .transit b, .transit span, .account-list h3, .account-list p, .account-group summary, .dday',
@@ -134,6 +275,9 @@ const parentsLine = (parents, name) => { if (!parents) return ''; const names = 
 // 신랑/신부 이름에서 성을 뗀 이름만 반환 (한 글자 성을 가정하는 일반적인 관례). invitation 본문 하단·D-day 문구 전용.
 const givenName = (name = '') => { const s = String(name).trim(); return s.length > 1 ? s.slice(1) : s; };
 const weddingCalendar = when => { const year = Number(when.year), month = Number(when.month), eventDay = Number(when.day); if (!year || !month || !eventDay) return ''; const firstWeekday = new Date(Date.UTC(year, month - 1, 1)).getUTCDay(); const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate(); const cells = Array.from({ length: firstWeekday + daysInMonth }, (_, index) => index < firstWeekday ? '<span class="calendar-empty"></span>' : `<span class="calendar-day${index - firstWeekday + 1 === eventDay ? ' calendar-event' : ''}">${index - firstWeekday + 1}</span>`); return `<div class="calendar" aria-label="${when.display} 달력"><div class="calendar-weekdays"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div><div class="calendar-days">${cells.join('')}</div></div>`; };
+// 히어로 상단 날짜 배지("07TH NOV 2026" 형식)용 서수 표기와 월 약어
+const ordinalDay = n => { const num = Number(n); if (!num) return ''; const v = num % 100; const suffix = (v >= 11 && v <= 13) ? 'TH' : ['TH', 'ST', 'ND', 'RD'][num % 10] || 'TH'; return `${num}${suffix}`; };
+const MONTH_ABBR = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 // 모든 섹션 공통: label/title이 wedding.json에 없거나 빈 값이면 해당 태그 자체를 렌더링하지 않습니다.
 // (하드코딩된 기본값으로 대체하지 않음 → invitation 섹션과 동일한 방식으로 통일)
 const tag = (tagName, className, value) => value ? `<${tagName}${className ? ` class="${className}"` : ''}>${esc(value)}</${tagName}>` : '';
@@ -142,7 +286,7 @@ function page(d) {
   const accountGroups = d.accounts?.groups || [];
   const weddingDay = d.weddingDay || {}, galleryData = d.gallery || {}, location = d.location || {}, accounts = d.accounts || {}, guestbook = d.guestbook || {};
   return `
-<header class="hero"><div class="hero-frame"><div class="hero-illustration"><img src="${esc(d.hero?.image)}" alt="${esc(d.hero?.alt)}" onerror="this.parentElement.classList.add('image-error')"></div><div class="hero-copy"><div class="hero-names"><span>${esc(c.groom)}</span><time><b>${esc(when.month)}</b><i></i><b>${esc(when.day)}</b></time><span>${esc(c.bride)}</span></div><p class="hero-date">${esc(when.year)}.${esc(when.month)}.${esc(when.day)} ${esc(when.weekday).slice(0, 1).toUpperCase()}. ${esc(when.time)}</p><p class="hero-venue">${esc(w.venue)} ${esc(w.hall)}</p></div></div></header>
+<header class="hero"><div class="hero-frame"><div class="hero-illustration"><img src="${esc(d.hero?.image)}" alt="${esc(d.hero?.alt)}" onerror="this.parentElement.classList.add('image-error')"></div><canvas class="hero-snow" aria-hidden="true"></canvas><div class="hero-copy"><p class="hero-date"><span>${esc(when.year)}</span><span>${esc(MONTH_ABBR[Number(when.month) - 1] || '')}</span><span>${esc(ordinalDay(when.day))}</span></p><h1 class="hero-headline">Getting<br>Married</h1><p class="hero-names-line"><span>${esc(c.groom)}</span>&amp;<span>${esc(c.bride)}</span></p></div></div></header>
 <section class="section invitation reveal">${tag('p', 'section-label', invitation.label)}${tag('h2', '', invitation.title)}<div class="prose">${(invitation.paragraphs || []).map(p => `<p>${esc(p)}</p>`).join('')}</div><hr class="invitation-divider"><p class="invitation-parents"><span>${parentsLine(c.groomParents, c.groom)}</span><span>${parentsLine(c.brideParents, c.bride)}</span></p></section>
 <section class="section info reveal">${tag('p', 'section-label', weddingDay.label)}<h2>${esc(when.display)}<br><span class="wedding-day-time">${esc(when.weekday)} ${esc(when.time)}</span></h2>${weddingCalendar(when)}<div class="countdown" id="countdown" data-target="${esc(w.date)}"><div class="countdown-unit"><span class="countdown-value" data-unit="days">00</span><small>DAYS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="hours">00</span><small>HRS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="minutes">00</span><small>MIN</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="seconds">00</span><small>SEC</small></div></div><strong class="dday">${ddaySentence(w.date, givenName(c.groom), givenName(c.bride))}</strong></section>
 <section class="section gallery-section reveal">${tag('p', 'section-label', galleryData.label)}${tag('h2', '', galleryData.title)}<div class="gallery-featured"><img id="galleryFeaturedImg" src="${esc(gallery[0]?.src)}" alt="${esc(gallery[0]?.alt || '')}"></div><div class="thumbs-slider-wrap"><button type="button" class="slider-nav slider-nav-prev" aria-label="이전 사진 보기">‹</button><div class="gallery-thumbs">${gallery.map((x, i) => `<button type="button" class="gallery-thumb${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="${i + 1}번째 사진 선택"><img src="${esc(x.src)}" alt="${esc(x.alt)}" loading="lazy"></button>`).join('')}</div><button type="button" class="slider-nav slider-nav-next" aria-label="다음 사진 보기">›</button></div></section>
@@ -346,7 +490,7 @@ function setupGuestbook() {
   }
 }
 
-function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.groups?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); blockImageZoom(); setupSlider('.thumbs-slider-wrap', '.gallery-thumbs'); setupSlider('.guestbook-slider-wrap', '.guestbook-entries'); }
+function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.groups?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); blockImageZoom(); setupHeroSnow(); setupSlider('.thumbs-slider-wrap', '.gallery-thumbs'); setupSlider('.guestbook-slider-wrap', '.guestbook-entries'); }
 let __countdownTimer = null;
 function setupCountdown() {
   const el = $('#countdown');

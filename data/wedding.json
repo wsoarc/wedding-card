@@ -163,10 +163,7 @@
     "label": "GUESTBOOK"
   },
   "typography": {
-    "hero": {
-      "fontFamily": "serif",
-      "fontSize": "16px"
-    },
+    "hero": {},
     "sectionLabel": {
       "fontFamily": "serif",
       "fontSize": "16px",
