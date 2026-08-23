@@ -237,6 +237,7 @@ const TYPOGRAPHY_MAP = {
 const FONT_PRESETS = {
   serif: 'var(--serif)',                // 차분하고 단정한 한글 명조 - 기본 세리프 (Gowun Batang)
   myeongjo: "'Nanum Myeongjo', serif",  // 전통적인 느낌의 명조체 - 격식 있는 본문에 어울림
+  maruburi: "'MaruBuri', serif",        // 네이버 마루 부리 - 온기 있고 현대적인 명조 계열(웹폰트는 style.css에서 별도 로드)
   thin: "'Song Myung', serif",          // 가늘고 우아한 세리프 - 숫자·날짜·짧은 문구에 어울림
   dodum: "'Gowun Dodum', sans-serif",   // 부드럽고 둥근 고딕 - 편안한 느낌의 본문/설명
   sans: 'var(--sans)',                  // 깔끔한 기본 고딕 (Pretendard)

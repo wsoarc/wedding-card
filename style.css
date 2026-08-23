@@ -1,9 +1,31 @@
+@font-face {
+  font-family: 'MaruBuri';
+  src: url('https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MaruBuri';
+  src: url('https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MaruBuri';
+  src: url('https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
   --color-background: #fafafa;
   --color-surface: #ffffff;
   --color-text: #3b333a;
-  --color-muted: #a3909c;
-  --color-accent: #c76b86;
+  --color-muted: #272727;
+  --color-accent: #646464;
+  --color-accent-calendar: #d6668f;
   --color-green: #84937a;
   --color-rule: #f2e2e7;
   --spacing-xl: 82px;
@@ -269,11 +291,11 @@ body {
   font-size: 15px;
   font-weight: 400;
   letter-spacing: .02em;
-  color: #4a3f45
+  color: var(--color-text)
 }
 
 .dday .dday-count {
-  color: var(--color-accent);
+  color: var(--color-accent-calendar);
   font-weight: 700
 }
 
@@ -305,7 +327,7 @@ body {
   font-family: var(--serif);
   font-size: 15px;
   line-height: 2.2;
-  color: #64564a
+  color: var(--color-muted)
 }
 
 .prose p {
@@ -331,7 +353,7 @@ body {
   font-family: var(--serif);
   font-size: 15px;
   line-height: 2.2;
-  color: #64564a;
+  color: var(--color-muted);
   letter-spacing: .01em
 }
 
@@ -500,7 +522,7 @@ body {
 }
 
 .calendar-weekdays span:first-child {
-  color: #c76b86
+  color: var(--color-accent-calendar)
 }
 
 .calendar-weekdays span:last-child {
@@ -528,7 +550,7 @@ body {
   width: 27px;
   height: 27px;
   border-radius: 50%;
-  background: var(--color-accent)
+  background: var(--color-accent-calendar)
 }
 
 .info .dday {
@@ -573,7 +595,7 @@ body {
 }
 
 .countdown.countdown-done .countdown-value {
-  color: var(--color-accent)
+  color: var(--color-accent-calendar)
 }
 
 .map {
@@ -636,7 +658,7 @@ body {
 
 .address {
   margin: 18px 0;
-  color: #65574c
+  color: var(--color-muted)
 }
 
 .link-row {
@@ -704,7 +726,7 @@ body {
   list-style: none;
   font-family: var(--serif);
   font-size: 18px;
-  background: #f8ecf0
+  background: #ffffff
 }
 
 .account-group summary span {

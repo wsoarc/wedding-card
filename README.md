@@ -97,6 +97,7 @@ access page to [wedding-card](https://wsoarc.github.io/wedding-card/)
 | `sans` | Pretendard | 깔끔한 기본 고딕. 라벨이나 정보성 텍스트에 적합 |
 | `script` | Parisienne | 우아한 영문 필기체. 한글엔 자동으로 다른 폰트로 대체되므로 영문·숫자 포인트용 |
 | `handwriting` | Gamja Flower | 귀엽고 따뜻한 손글씨. 방명록처럼 친근한 느낌을 줄 때 |
+| `maruburi` | 마루 부리(MaruBuri) | 네이버가 배포한 온기 있는 명조 계열. 본문에 현대적이면서 단정한 느낌을 줄 때 |
 
 ### 카테고리별 기본 적용 폰트
 
