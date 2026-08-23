@@ -495,7 +495,7 @@ function setupGuestbook() {
   }
 }
 
-function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} ♥ ${d.couple?.bride || '신부'} 결혼합니다`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.groups?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); blockImageZoom(); setupHeroSnow(); setupSlider('.thumbs-slider-wrap', '.gallery-thumbs'); setupSlider('.guestbook-slider-wrap', '.guestbook-entries'); }
+function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.groups?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); blockImageZoom(); setupHeroSnow(); setupSlider('.thumbs-slider-wrap', '.gallery-thumbs'); setupSlider('.guestbook-slider-wrap', '.guestbook-entries'); }
 let __countdownTimer = null;
 function setupCountdown() {
   const el = $('#countdown');
@@ -563,11 +563,12 @@ function openMapNav(service, loc, venueName) {
       web: `https://map.naver.com/p/search/${name}`
     },
     kakao: {
-      app: `kakaomap://route?ep=${lat},${lng}&by=CAR`,
+      app: `kakaomap://route?ep=${lat},${lng}&en=${name}&by=publictransit`,
       store: isIOS ? 'https://apps.apple.com/kr/app/id304608425' : 'https://play.google.com/store/apps/details?id=net.daum.android.map',
       web: `https://map.kakao.com/link/to/${name},${lat},${lng}`
     },
     tmap: {
+      // 티맵 딥링크(tmap://route)는 대중교통 이동수단 파라미터를 지원하지 않고 항상 자동차 길찾기로 열림(티맵 자체 제약).
       app: `tmap://route?goalname=${name}&goalx=${lng}&goaly=${lat}`,
       store: isIOS ? 'https://apps.apple.com/kr/app/id431589174' : 'https://play.google.com/store/apps/details?id=com.skt.tmap.ku',
       web: null
@@ -577,8 +578,15 @@ function openMapNav(service, loc, venueName) {
   if (!target) return;
   if (!isIOS && !isAndroid) { window.open(target.web || target.store, '_blank', 'noopener'); return; }
   const fallback = target.web || target.store;
-  const timer = setTimeout(() => { if (!document.hidden) location.href = fallback; }, 1500);
-  window.addEventListener('pagehide', () => clearTimeout(timer), { once: true });
+  // 앱이 실제로 열렸는지 확인하는 신호를 pagehide 하나에만 의존하면(특히 티맵에서) 앱 전환이 살짝 느릴 때
+  // 타이머가 먼저 발동해 설치돼 있어도 스토어 팝업이 뜨는 오탐이 생김.
+  // visibilitychange/blur까지 함께 감시하고 타임아웃도 살짝 늘려 오탐 가능성을 줄임.
+  let cancelled = false;
+  const cancel = () => { cancelled = true; clearTimeout(timer); };
+  const timer = setTimeout(() => { if (!cancelled && !document.hidden) location.href = fallback; }, 2000);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) cancel(); }, { once: true });
+  window.addEventListener('pagehide', cancel, { once: true });
+  window.addEventListener('blur', cancel, { once: true });
   location.href = target.app;
 }
 
