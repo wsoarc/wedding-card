@@ -114,7 +114,16 @@ access page to [wedding-card](https://wsoarc.github.io/wedding-card/)
 | `guestbook` | 방명록 메시지·작성자 이름 | `handwriting` | 손글씨체로 진짜 방명록처럼 친근하게 |
 | `thanks` | 마지막 인사 라벨·날짜 | `serif` | hero·제목과 통일감 있는 마무리 |
 
-## Firebase 방명록 설정
+## 카카오톡 등 링크 공유 시 썸네일 이미지 설정
+
+`index.html`의 `<head>`에 있는 `og:image`(및 `twitter:image`) 값이 카카오톡·문자·SNS에 링크를 붙여넣었을 때 뜨는 미리보기 사진입니다. 현재는 `wedding.json`의 `hero.image`와 같은 사진(`assets/images/gallery_006.jpg`)의 절대 주소로 지정되어 있습니다.
+
+- 대표 사진을 바꾸고 싶다면 `og:image`와 `twitter:image` 두 줄의 파일명을 원하는 사진으로 교체하세요. 주소는 반드시 `https://wsoarc.github.io/wedding-card/...` 형태의 **절대 경로**여야 하며, 상대 경로(`assets/images/...`)로는 미리보기가 뜨지 않습니다.
+- 카카오톡은 이미지를 정사각형에 가깝게 크롭해서 보여주므로, 인물이 사진 중앙에 오는 사진을 고르는 것이 좋습니다.
+- 배포(GitHub Pages 반영) 후에도 카카오톡 등은 한 번 가져온 미리보기를 한동안 캐싱합니다. 새 이미지가 바로 안 뜨면 [카카오 디버거](https://developers.kakao.com/tool/debugger/sharing)에 주소를 넣고 새로고침하면 캐시가 갱신됩니다.
+- 제목/설명 문구도 같은 위치의 `og:title`, `og:description`(및 twitter 버전)에서 수정할 수 있습니다.
+
+
 
 방명록은 Cloud Firestore에 `이름`, `메시지`, `작성 시각`을 저장하고 최근 20개를 실시간으로 표시합니다. 방문자에게는 수정·삭제 기능을 제공하지 않으며, 부적절한 글은 Firebase Console에서 삭제할 수 있습니다.
 
