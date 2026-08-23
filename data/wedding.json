@@ -2,6 +2,8 @@
   "couple": {
     "groom": "도윤",
     "bride": "서윤",
+    "groomEn": "",
+    "brideEn": "",
     "groomParents": {
       "father": "김대영",
       "mother": "이온유",
