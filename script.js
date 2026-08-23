@@ -186,8 +186,12 @@ function setupSlider(wrapSelector, scrollSelector) {
 
   // 고정폭만큼 scrollBy 하면 남은 거리가 애매하게 남아 아이템 중간에서 멈춰 여백이 보일 수 있어서,
   // 항상 실제 아이템의 시작 위치(offsetLeft)로 스크롤을 맞춰서 절대 어중간한 위치에 멈추지 않게 함.
+  // scroll-snap-type이 mandatory인 경우 유효한 스냅 위치는 offsetLeft가 아니라
+  // offsetLeft - scroll-padding-left 이므로, 이 값으로 보정하지 않으면 스냅이 목표 위치를
+  // 무효 처리하고 원래 자리로 되돌려버려 버튼을 눌러도 안 움직이는 것처럼 보인다.
+  const snapInset = parseFloat(getComputedStyle(scrollEl).scrollPaddingLeft) || 0;
   const goTo = dir => {
-    const positions = Array.from(scrollEl.children).map(el => el.offsetLeft);
+    const positions = Array.from(scrollEl.children).map(el => el.offsetLeft - snapInset);
     const current = scrollEl.scrollLeft;
     const end = maxScroll();
     let target;

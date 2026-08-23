@@ -868,6 +868,7 @@ body {
   gap: 10px;
   overflow-x: auto;
   padding: 4px 28px 12px;
+  scroll-padding: 0 28px;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
