@@ -1,11 +1,11 @@
 :root {
-  --color-background: #f5f0e7;
-  --color-surface: #fffdf9;
-  --color-text: #463a31;
-  --color-muted: #85776a;
-  --color-accent: #9a765c;
+  --color-background: #fafafa;
+  --color-surface: #ffffff;
+  --color-text: #3b333a;
+  --color-muted: #a3909c;
+  --color-accent: #c76b86;
   --color-green: #84937a;
-  --color-rule: #dfd5c5;
+  --color-rule: #f2e2e7;
   --spacing-xl: 82px;
   --radius-sm: 8px;
   --radius-md: 18px;
@@ -19,7 +19,7 @@
 }
 
 html {
-  background: #ded8cc;
+  background: #ececec;
   scroll-behavior: smooth;
   touch-action: pan-x pan-y;
 }
@@ -41,8 +41,11 @@ body {
   min-height: 100vh;
   box-shadow: 0 0 40px #5f55451c;
   background-color: var(--color-background);
-  background-image: radial-gradient(#bba98f2b .65px, transparent .8px), linear-gradient(125deg, #f9f5ec 0%, #f2ebdf 100%);
-  background-size: 8px 8px, 100% 100%
+  background-color: #fafafa;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0.25 0 0 0 -0.05'/%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(125deg, #fdfdfd 0%, #f5f5f5 100%);
+  background-size: 60px 60px, 100% 100%
 }
 
 .loading {
@@ -136,7 +139,7 @@ body {
   justify-content: flex-start;
   min-height: 720px;
   border: 0;
-  background: #e6d9c3;
+  background: #f5e9ee;
   overflow: hidden
 }
 
@@ -144,7 +147,7 @@ body {
   position: absolute;
   inset: 0;
   height: 100%;
-  background: #e6d9c3
+  background: #f5e9ee
 }
 
 .hero-illustration img {
@@ -266,7 +269,7 @@ body {
   font-size: 15px;
   font-weight: 400;
   letter-spacing: .02em;
-  color: #5b473b
+  color: #4a3f45
 }
 
 .dday .dday-count {
@@ -318,7 +321,7 @@ body {
   height: 1px;
   margin: 26px auto 18px;
   border: none;
-  background: #d8c3bd
+  background: #e4b8c6
 }
 
 .invitation-parents {
@@ -401,7 +404,7 @@ body {
 .gallery-featured {
   overflow: hidden;
   border-radius: var(--radius-sm);
-  background: #e5dac9;
+  background: #f5e9ee;
   margin-bottom: 10px
 }
 
@@ -438,7 +441,7 @@ body {
   border: 2px solid transparent;
   border-radius: var(--radius-sm);
   overflow: hidden;
-  background: #e5dac9;
+  background: #f5e9ee;
   cursor: pointer;
   opacity: .6;
   transition: opacity .2s, border-color .2s
@@ -497,7 +500,7 @@ body {
 }
 
 .calendar-weekdays span:first-child {
-  color: #b37670
+  color: #c76b86
 }
 
 .calendar-weekdays span:last-child {
@@ -578,8 +581,8 @@ body {
   width: 100%;
   height: 240px;
   border-radius: var(--radius-sm);
-  border: 1px solid #e5ddcf;
-  background: #e6e0d2;
+  border: 1px solid #f2e2e7;
+  background: #f5e9ee;
   overflow: hidden
 }
 
@@ -701,7 +704,7 @@ body {
   list-style: none;
   font-family: var(--serif);
   font-size: 18px;
-  background: #ece2cf
+  background: #f8ecf0
 }
 
 .account-group summary span {
@@ -898,7 +901,7 @@ body {
   padding: 14px 12px 16px;
   scroll-snap-align: start;
   border-radius: 6px;
-  background: #fff6f5;
+  background: #fdf7f9;
   box-shadow: 0 3px 13px #7654490d;
   color: #5d514c;
   text-align: left
@@ -957,8 +960,8 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 250px;
-  background: #f7ece8;
-  border: 1px dashed #d5bbb1
+  background: #f9edf1;
+  border: 1px dashed #e4b8c6
 }
 
 .guestbook-compose-card button {
