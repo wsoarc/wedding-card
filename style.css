@@ -915,6 +915,25 @@ body {
   display: none
 }
 
+.guestbook-disabled {
+  opacity: .85
+}
+
+.guestbook-disabled-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  cursor: default
+}
+
+.guestbook-disabled-card p {
+  flex: none;
+  margin: 0;
+  text-align: center;
+  color: #786b65
+}
+
 .guestbook-entry {
   flex: 0 0 175px;
   height: 250px;

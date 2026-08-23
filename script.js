@@ -372,6 +372,20 @@ function renderGuestbookEntries(entries) {
 }
 
 function setupGuestbook() {
+  const section = document.querySelector('.guestbook');
+  if (!isFirebaseConfigured) {
+    // Firebase 연동 전에는 방명록 섹션 전체를 비활성화된 느낌의 안내 카드 하나로 대체.
+    // 슬라이더/작성폼/전체보기 다이얼로그는 아예 렌더링하지 않으므로 이벤트도 붙이지 않음.
+    if (section) {
+      section.classList.add('guestbook-disabled');
+      const keep = [...section.children].filter(el => el.matches('.section-label, h2'));
+      const card = document.createElement('div');
+      card.className = 'guestbook-entry guestbook-disabled-card';
+      card.innerHTML = '<div class="guestbook-note-decoration"><span aria-hidden="true">✽</span></div><p>방명록은 준비 중이에요.</p>';
+      section.replaceChildren(...keep, card);
+    }
+    return;
+  }
   const form = $('#guestbookForm'), entries = $('#guestbookEntries');
   if (!form || !entries) return;
   const writeDialog = document.createElement('dialog');
@@ -461,12 +475,6 @@ function setupGuestbook() {
   $('#guestbookWrite')?.addEventListener('click', openForm);
   $('#guestbookAll')?.addEventListener('click', showAll);
   $('#guestbookAllClose')?.addEventListener('click', () => $('#guestbookAllDialog')?.close());
-  if (!isFirebaseConfigured) {
-    renderGuestbookEntries([]);
-    entries.querySelector('[data-guestbook-compose]').disabled = true;
-    entries.querySelector('[data-guestbook-compose]').textContent = '방명록 준비 중';
-    return;
-  }
   $('#guestbookCancel')?.addEventListener('click', () => {
     closeForm();
   });
