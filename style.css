@@ -656,11 +656,6 @@ body {
   transform: scale(.96)
 }
 
-.address {
-  margin: 18px 0;
-  color: var(--color-muted)
-}
-
 .link-row {
   display: flex;
   gap: 8px
@@ -695,12 +690,50 @@ body {
   font-size: 13px
 }
 
+.transit p:last-child {
+  border-bottom: none
+}
+
 .transit b {
   color: var(--color-accent)
 }
 
 .transit span {
   color: var(--color-muted)
+}
+
+.transit-line {
+  display: table;
+  width: 100%;
+  table-layout: auto;
+  line-height: 1.5
+}
+
+.transit-line+.transit-line {
+  margin-top: 4px
+}
+
+.transit-line-label {
+  display: table-cell;
+  white-space: nowrap;
+  padding-right: 12px;
+  vertical-align: top
+}
+
+.transit-line-value {
+  display: table-cell;
+  width: 100%;
+  vertical-align: top
+}
+
+.transit-line-note {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--color-muted)
+}
+
+.transit-line-note .transit-line-label {
+  padding-right: 6px
 }
 
 .account-list {

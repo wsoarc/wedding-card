@@ -227,7 +227,7 @@ const TYPOGRAPHY_MAP = {
   hero: '.hero-headline, .hero-date, .hero-names-line',
   sectionLabel: '.section-label, .eyebrow',
   sectionTitle: '.section h2, .info h2, .thanks h2',
-  body: '.prose, .invitation-parents, .address, .transit b, .transit span, .account-list h3, .account-list p, .account-group summary, .dday',
+  body: '.prose, .invitation-parents, .transit b, .transit span, .account-list h3, .account-list p, .account-group summary, .dday',
   countdown: '.countdown-value',
   story: '.timeline time, .timeline h3, .timeline p',
   guestbook: '.guestbook-entry p, .guestbook-entry strong',
@@ -271,7 +271,33 @@ function applyTypography(typography = {}) {
 const $ = (s, p = document) => p.querySelector(s);
 const esc = (value = '') => String(value).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 // 배열이면 줄마다, 문자열이면 \n 기준으로 나눠 각 줄을 이스케이프한 뒤 <br>로 합침 (여러 줄 문구용)
-const escLines = (value) => (Array.isArray(value) ? value : String(value ?? '').split('\n')).map(esc).join('<br>');
+const escLines = (value) => {
+  const rawLines = (Array.isArray(value) ? value : String(value ?? '').split('\n')).map(esc);
+  const blocks = [];
+  rawLines.forEach(line => {
+    // "지선 0411, 4432, ..." 처럼 "라벨 내용" 형태면 라벨/내용을 나눠서,
+    // 내용이 길어 여러 줄로 감길 때 라벨 너비만큼 자동으로 들여써지게(hanging indent) 함.
+    // 라벨과 내용 사이의 콜론(:)은 표시하지 않고 여백으로만 구분함.
+    const labelMatch = line.match(/^([^:：]{1,12})[:：]\s*(.*)$/);
+    // "※ ..." 같은 당구장표시 주석 줄도 같은 방식으로 표시 기호 너비만큼 들여써지게 함.
+    const noteMatch = line.match(/^(※)\s*(.*)$/);
+    if (labelMatch) {
+      blocks.push({ type: 'line', label: labelMatch[1], values: [labelMatch[2]] });
+    } else if (noteMatch) {
+      blocks.push({ type: 'note', label: noteMatch[1], values: [noteMatch[2]] });
+    } else if (blocks.length && (blocks[blocks.length - 1].type === 'line' || blocks[blocks.length - 1].type === 'note')) {
+      // 라벨/당구장표시가 없는 줄은 바로 앞줄에 이어지는 내용으로 보고 같은 들여쓰기 칸에 붙임
+      blocks[blocks.length - 1].values.push(line);
+    } else {
+      blocks.push({ type: 'plain', values: [line] });
+    }
+  });
+  return blocks.map(b => {
+    if (b.type === 'plain') return `<span class="transit-line">${b.values.join('<br>')}</span>`;
+    const noteClass = b.type === 'note' ? ' transit-line-note' : '';
+    return `<span class="transit-line${noteClass}"><span class="transit-line-label">${b.label}</span><span class="transit-line-value">${b.values.join('<br>')}</span></span>`;
+  }).join('');
+};
 let data, gallery = [], activeImage = 0, audio, guestbookEntries = [];
 const toast = message => { const el = $('#toast'); el.textContent = message; el.classList.add('show'); clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove('show'), 2200); };
 const ddaySentence = (iso, groom, bride) => { const wedding = new Date(iso); if (Number.isNaN(wedding)) return ''; const now = new Date(); const inKorea = d => new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Seoul' })); const a = inKorea(now); const b = inKorea(wedding); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); const days = Math.round((b - a) / 86400000); const names = `${esc(groom)} <i>&amp;</i> ${esc(bride)}`; if (days === 0) return `오늘은 ${names}의 <b class="dday-count">결혼식</b>이에요`; if (days > 0) return `${names}의 결혼식까지 <b class="dday-count">${days}일</b> 남았어요`; return `${names}가 결혼한 지 <b class="dday-count">${Math.abs(days)}일</b> 되었어요`; };
@@ -295,7 +321,7 @@ function page(d) {
 <section class="section invitation reveal">${tag('p', 'section-label', invitation.label)}${tag('h2', '', invitation.title)}<div class="prose">${(invitation.paragraphs || []).map(p => `<p>${esc(p)}</p>`).join('')}</div><hr class="invitation-divider"><p class="invitation-parents"><span>${parentsLine(c.groomParents, c.groom)}</span><span>${parentsLine(c.brideParents, c.bride)}</span></p></section>
 <section class="section info reveal">${tag('p', 'section-label', weddingDay.label)}<h2>${esc(when.display)}<br><span class="wedding-day-time">${esc(when.weekday)} ${esc(when.time)}</span></h2>${weddingCalendar(when)}<div class="countdown" id="countdown" data-target="${esc(w.date)}"><div class="countdown-unit"><span class="countdown-value" data-unit="days">00</span><small>DAYS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="hours">00</span><small>HRS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="minutes">00</span><small>MIN</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="seconds">00</span><small>SEC</small></div></div><strong class="dday">${ddaySentence(w.date, givenName(c.groom), givenName(c.bride))}</strong></section>
 <section class="section gallery-section reveal">${tag('p', 'section-label', galleryData.label)}${tag('h2', '', galleryData.title)}<div class="gallery-featured"><img id="galleryFeaturedImg" src="${esc(gallery[0]?.src)}" alt="${esc(gallery[0]?.alt || '')}"></div><div class="thumbs-slider-wrap"><button type="button" class="slider-nav slider-nav-prev" aria-label="이전 사진 보기">‹</button><div class="gallery-thumbs">${gallery.map((x, i) => `<button type="button" class="gallery-thumb${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="${i + 1}번째 사진 선택"><img src="${esc(x.src)}" alt="${esc(x.alt)}" loading="lazy"></button>`).join('')}</div><button type="button" class="slider-nav slider-nav-next" aria-label="다음 사진 보기">›</button></div></section>
-<section class="section location reveal">${tag('p', 'section-label', location.label)}${tag('h2', '', location.title)}<div id="naverMap" class="map" role="img" aria-label="${esc(location.mapAlt || `${w.venue || '예식장'} 주변 지도`)}"><noscript><img class="map" src="${esc(location.mapImage)}" alt="${esc(location.mapAlt || `${w.venue || '예식장'} 주변 약도`)}"></noscript></div><div class="map-nav-buttons"><button type="button" class="map-nav-button" data-nav="naver"><img class="map-nav-icon" src="assets/icons/naver.png" alt="" loading="lazy"><span>네이버지도</span></button><button type="button" class="map-nav-button" data-nav="kakao"><img class="map-nav-icon" src="assets/icons/kakao.png" alt="" loading="lazy"><span>카카오맵</span></button><button type="button" class="map-nav-button" data-nav="tmap"><img class="map-nav-icon" src="assets/icons/tmap.png" alt="" loading="lazy"><span>티맵</span></button></div><p class="address">${esc(w.address)}</p><div class="transit">${(location.transit || []).map(x => `<p><b>${esc(x.label)}</b><span>${escLines(x.text)}</span></p>`).join('')}</div></section>
+<section class="section location reveal">${tag('p', 'section-label', location.label)}${tag('h2', '', location.title)}<div id="naverMap" class="map" role="img" aria-label="${esc(location.mapAlt || `${w.venue || '예식장'} 주변 지도`)}"><noscript><img class="map" src="${esc(location.mapImage)}" alt="${esc(location.mapAlt || `${w.venue || '예식장'} 주변 약도`)}"></noscript></div><div class="map-nav-buttons"><button type="button" class="map-nav-button" data-nav="naver"><img class="map-nav-icon" src="assets/icons/naver.png" alt="" loading="lazy"><span>네이버지도</span></button><button type="button" class="map-nav-button" data-nav="kakao"><img class="map-nav-icon" src="assets/icons/kakao.png" alt="" loading="lazy"><span>카카오맵</span></button><button type="button" class="map-nav-button" data-nav="tmap"><img class="map-nav-icon" src="assets/icons/tmap.png" alt="" loading="lazy"><span>티맵</span></button></div><div class="transit"><p><b>주소</b><span>${esc(w.address)}</span></p>${(location.transit || []).map(x => `<p><b>${esc(x.label)}</b><span>${escLines(x.text)}</span></p>`).join('')}</div></section>
 <section class="section accounts reveal">${tag('p', 'section-label', accounts.label)}${tag('h2', '', accounts.title)}<div class="account-list">${accountGroups.map((group, groupIndex) => `<details class="account-group"><summary><span>${esc(group.side)} 계좌번호</span></summary><div class="account-items"><div class="account-items-inner">${(group.accounts || []).map((account, accountIndex) => `<article class="account-item"><div><h3>${esc(account.holder)}</h3><p>${esc(account.bank)} <b>${esc(account.number)}</b></p></div><button class="copy-button" data-group="${groupIndex}" data-account="${accountIndex}" aria-label="${esc(account.relation)} 계좌번호 복사"><span class="copy-icon">⧉</span>복사</button></article>`).join('')}</div></div></details>`).join('')}</div></section>
 <section class="section guestbook reveal">${tag('p', 'section-label', guestbook.label)}${tag('h2', '', guestbook.title)}<div class="guestbook-slider-wrap"><button type="button" class="slider-nav slider-nav-prev" aria-label="이전 방명록 보기">‹</button><div id="guestbookEntries" class="guestbook-entries" aria-live="polite" aria-label="방명록 목록"><p class="guestbook-state">방명록을 불러오는 중이에요.</p></div><button type="button" class="slider-nav slider-nav-next" aria-label="다음 방명록 보기">›</button></div><div class="guestbook-slider-actions"><button id="guestbookWrite" type="button">✏️작성하기</button><button id="guestbookAll" type="button">📖전체보기</button></div><form id="guestbookForm" class="guestbook-form" hidden><label>이름<input id="guestbookName" name="name" maxlength="20" autocomplete="name" required placeholder="이름을 입력해 주세요"></label><label>축하 메시지<textarea id="guestbookMessage" name="message" maxlength="300" required placeholder="두 분을 위한 축하의 마음을 남겨 주세요"></textarea></label><div class="guestbook-form-actions"><button id="guestbookCancel" class="guestbook-cancel" type="button">취소</button><button class="guestbook-submit" type="submit">남기기</button></div></form><dialog id="guestbookAllDialog" class="guestbook-all-dialog"><div class="guestbook-all-header"><h2>방명록 전체보기</h2><button id="guestbookAllClose" type="button" aria-label="전체보기 닫기">×</button></div><div id="guestbookAllEntries" class="guestbook-all-entries"></div></dialog></section>
 <footer class="thanks reveal"><span>Thank you for celebrating with us</span><h2>${esc(c.groom)} <i>&amp;</i> ${esc(c.bride)}</h2><p>${esc(when.display)}</p></footer>`;
