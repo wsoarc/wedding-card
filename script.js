@@ -227,9 +227,11 @@ const TYPOGRAPHY_MAP = {
   hero: '.hero-headline, .hero-date, .hero-names-line',
   sectionLabel: '.section-label, .eyebrow',
   sectionTitle: '.section h2, .info h2, .thanks h2',
-  body: '.prose, .invitation-parents, .transit b, .transit span, .account-list h3, .account-list p, .account-group summary, .dday',
+  body: '.prose, .account-list h3, .account-list p, .account-group summary, .dday',
+  parents: '.invitation-parents',
   countdown: '.countdown-value',
   story: '.timeline time, .timeline h3, .timeline p',
+  transit: '.transit b, .transit span',
   guestbook: '.guestbook-entry p, .guestbook-entry strong',
   thanks: '.thanks span, .thanks p'
 };

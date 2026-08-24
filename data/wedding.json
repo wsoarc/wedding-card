@@ -168,14 +168,23 @@
     "hero": {},
     "sectionLabel": {
       "fontFamily": "serif",
-      "fontSize": "16px",
+      "fontSize": "20px",
       "letterSpacing": "0.22em"
     },
     "sectionTitle": {
       "fontFamily": "serif"
     },
     "body": {
-      "fontFamily": "serif"
+      "fontFamily": "serif",
+      "fontSize": "16px"
+    },
+    "parents": {
+      "fontFamily": "serif",
+      "fontSize": "16px"
+    },
+    "transit": {
+      "fontFamily": "serif",
+      "fontSize": "14px"
     },
     "countdown": {
       "fontFamily": "thin",

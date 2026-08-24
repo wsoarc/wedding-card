@@ -108,9 +108,11 @@ access page to [wedding-card](https://wsoarc.github.io/wedding-card/)
 | `hero` | 첫 화면 제목·이름·날짜·예식장명 | `script` | 첫인상을 우아하게 장식하는 필기체 포인트 |
 | `sectionLabel` | 각 섹션 상단 라벨(INVITATION, GALLERY 등) | `sans` | 짧은 영문 라벨은 깔끔한 고딕이 잘 읽힘 |
 | `sectionTitle` | 각 섹션 제목(h2), 마지막 인사 이름 | `serif` | 단정한 명조로 제목의 무게감 유지 |
-| `body` | 초대의 글, 혼주 이름, 주소, 오시는 길, 계좌 정보, D-day 문구 | `myeongjo` | 격식 있고 가독성 좋은 명조로 본문 안정감 |
+| `body` | 초대의 글, 계좌 정보, D-day 문구 | `myeongjo` | 격식 있고 가독성 좋은 명조로 본문 안정감 |
+| `parents` | 혼주 이름 두 줄(예: "○○○ · ○○○의 아들 ○○○") | `myeongjo` | 본문과 분리해 크기·자간을 별도로 조정 가능 |
 | `countdown` | 카운트다운 숫자 | `thin` | 가는 세리프로 숫자가 세련되게 보임 |
 | `story` | 스토리(타임라인) 연도·제목·설명 | `dodum` | 둥글고 부드러운 고딕으로 편안한 서술 느낌 |
+| `transit` | 오시는 길 교통수단 안내(지하철·버스·주차 등) | `myeongjo` | 본문과 분리해 크기·자간을 별도로 조정 가능 |
 | `guestbook` | 방명록 메시지·작성자 이름 | `handwriting` | 손글씨체로 진짜 방명록처럼 친근하게 |
 | `thanks` | 마지막 인사 라벨·날짜 | `serif` | hero·제목과 통일감 있는 마무리 |
 
