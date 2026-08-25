@@ -323,6 +323,21 @@ body {
   letter-spacing: .02em
 }
 
+.location-venue {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin: 0 0 6px
+}
+
+.location-address {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--color-text);
+  margin: 0 0 36px
+}
+
 .prose {
   font-family: var(--serif);
   font-size: 15px;
