@@ -362,9 +362,11 @@ body {
 }
 
 .invitation-parents {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  justify-content: center;
+  column-gap: 8px;
+  row-gap: 10px;
   font-family: var(--serif);
   font-size: 15px;
   line-height: 2.2;
@@ -372,10 +374,18 @@ body {
   letter-spacing: .01em
 }
 
-.invitation-child {
-  display: inline-block;
-  width: 32px;
+.parents-col-names {
+  text-align: right;
+  white-space: nowrap
+}
+
+.parents-col-child {
   text-align: center;
+  white-space: nowrap
+}
+
+.parents-col-name {
+  text-align: left;
   white-space: nowrap
 }
 
