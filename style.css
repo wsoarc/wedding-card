@@ -772,8 +772,8 @@ body {
 
 .account-group {
   background: transparent;
-  border: 1px solid #e7ddce;
-  border-radius: var(--radius-sm);
+  border: 1px solid #e2dbcb;
+  border-radius: 10px;
   overflow: hidden
 }
 
@@ -787,7 +787,7 @@ body {
   list-style: none;
   font-family: var(--serif);
   font-size: 18px;
-  background: #ffffff
+  background: #fffdf9
 }
 
 .account-group summary span {
@@ -1172,13 +1172,27 @@ body {
 
 .guestbook-all-entries {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 190px);
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   justify-content: start;
   gap: 12px;
   padding: 20px;
   max-height: calc(82vh - 69px);
   overflow-y: auto;
   scrollbar-width: none
+}
+
+@media (max-width: 380px) {
+  .guestbook-all-entries {
+    grid-template-columns: repeat(auto-fit, minmax(114px, 1fr));
+    gap: 8px;
+    padding: 14px
+  }
+
+  .guestbook-all-entries .guestbook-entry,
+  .guestbook-all-entries .guestbook-state {
+    height: 210px;
+    padding: 11px 9px 12px
+  }
 }
 
 .guestbook-all-entries::-webkit-scrollbar {
