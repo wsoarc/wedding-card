@@ -740,6 +740,8 @@ body {
 .account-list {
   display: grid;
   gap: 10px;
+  max-width: 280px;
+  margin: 0 auto;
   text-align: left
 }
 
@@ -812,7 +814,8 @@ body {
 .account-items-inner {
   min-height: 0;
   overflow: hidden;
-  padding: 0 18px 7px
+  padding: 0 18px 7px;
+  border-top: 1px solid #e7ddce
 }
 
 .account-item {
@@ -829,13 +832,14 @@ body {
 }
 
 .account-list h3 {
-  font: 400 15px var(--serif);
+  font: 400 13px var(--sans);
   margin: 0 0 3px
 }
 
 .account-list p {
   margin: 1px 0;
-  font-size: 15px;
+  font-family: var(--sans);
+  font-size: 13px;
   color: var(--color-muted)
 }
 

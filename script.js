@@ -227,7 +227,7 @@ const TYPOGRAPHY_MAP = {
   hero: '.hero-headline, .hero-date, .hero-names-line',
   sectionLabel: '.section-label, .eyebrow',
   sectionTitle: '.section h2, .info h2, .thanks h2',
-  body: '.prose, .account-list h3, .account-list p, .account-group summary, .dday',
+  body: '.prose, .account-group summary, .dday',
   parents: '.invitation-parents',
   countdown: '.countdown-value',
   calendar: '.calendar-weekdays span, .calendar-day',
