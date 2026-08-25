@@ -190,6 +190,10 @@
       "fontFamily": "thin",
       "letterSpacing": "0.04em"
     },
+    "calendar": {
+      "fontFamily": "serif",
+      "fontSize": "14px"
+    },
     "story": {
       "fontFamily": "dodum"
     },

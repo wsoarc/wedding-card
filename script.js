@@ -230,6 +230,7 @@ const TYPOGRAPHY_MAP = {
   body: '.prose, .account-list h3, .account-list p, .account-group summary, .dday',
   parents: '.invitation-parents',
   countdown: '.countdown-value',
+  calendar: '.calendar-weekdays span, .calendar-day',
   story: '.timeline time, .timeline h3, .timeline p',
   transit: '.transit b, .transit span',
   guestbook: '.guestbook-entry p, .guestbook-entry strong',
