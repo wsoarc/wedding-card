@@ -167,7 +167,7 @@
   "typography": {
     "hero": {},
     "sectionLabel": {
-      "fontFamily": "serif",
+      "fontFamily": "Cormorant Garamond, serif",
       "fontSize": "20px",
       "letterSpacing": "0.22em"
     },

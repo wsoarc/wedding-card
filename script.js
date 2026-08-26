@@ -253,7 +253,11 @@ function applyTypography(typography = {}) {
     const selector = TYPOGRAPHY_MAP[key];
     if (!selector || !rules || typeof rules !== 'object') return;
     const decls = [];
-    if (rules.fontFamily) decls.push(`font-family: ${FONT_PRESETS[rules.fontFamily] || `'${rules.fontFamily}', var(--sans)`} !important`);
+    if (rules.fontFamily) {
+      const preset = FONT_PRESETS[rules.fontFamily];
+      const value = preset || (rules.fontFamily.includes(',') ? rules.fontFamily : `'${rules.fontFamily}', var(--sans)`);
+      decls.push(`font-family: ${value} !important`);
+    }
     if (rules.fontSize) decls.push(`font-size: ${rules.fontSize} !important`);
     if (rules.fontWeight) decls.push(`font-weight: ${rules.fontWeight} !important`);
     if (rules.lineHeight) decls.push(`line-height: ${rules.lineHeight} !important`);
