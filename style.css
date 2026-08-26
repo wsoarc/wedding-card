@@ -1134,7 +1134,7 @@ body {
   padding: 0;
   border: 0;
   border-radius: 12px;
-  background: var(--color-background);
+  background: #f0e9e2;
   color: var(--color-text);
   overflow: hidden
 }
@@ -1171,9 +1171,8 @@ body {
 }
 
 .guestbook-all-entries {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  justify-content: start;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   padding: 20px;
   max-height: calc(82vh - 69px);
@@ -1183,15 +1182,8 @@ body {
 
 @media (max-width: 380px) {
   .guestbook-all-entries {
-    grid-template-columns: repeat(auto-fit, minmax(114px, 1fr));
     gap: 8px;
     padding: 14px
-  }
-
-  .guestbook-all-entries .guestbook-entry,
-  .guestbook-all-entries .guestbook-state {
-    height: 210px;
-    padding: 11px 9px 12px
   }
 }
 
@@ -1206,8 +1198,24 @@ body {
 
 .guestbook-all-entries .guestbook-entry,
 .guestbook-all-entries .guestbook-state {
-  height: 230px;
-  width: auto
+  width: 100%;
+  height: auto;
+  min-height: 90px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 14px 16px;
+}
+
+.guestbook-all-entries .guestbook-entry p {
+  margin: 0;
+  max-height: none;
+  text-align: left;
+}
+
+.guestbook-all-entries .guestbook-entry strong {
+  align-self: flex-end;
+  text-align: right;
 }
 
 .guestbook-form {

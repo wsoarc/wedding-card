@@ -486,14 +486,11 @@ function setupGuestbook() {
     guestbookEntries.forEach(entry => {
       const item = document.createElement('article');
       item.className = 'guestbook-entry';
-      const decoration = document.createElement('div');
-      decoration.className = 'guestbook-note-decoration';
-      decoration.innerHTML = '<span aria-hidden="true">✽</span>';
       const message = document.createElement('p');
       message.textContent = entry.message;
       const name = document.createElement('strong');
       name.textContent = `- ${entry.name} -`;
-      item.append(decoration, message, name);
+      item.append(message, name);
       container.append(item);
     });
     $('#guestbookAllDialog')?.showModal();
