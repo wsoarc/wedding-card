@@ -17,9 +17,9 @@
   },
   "wedding": {
     "date": "2026-11-07T11:00:00+09:00",
-    "venue": "엘블레스",
+    "venue": "양재 엘블레스",
     "hall": "다이아몬드홀",
-    "address": "서울시 서초구 강남대로 213"
+    "address": "서울시 서초구 강남대로 213 LL층"
   },
   "hero": {
     "image": "assets/images/gallery_006.jpg",
@@ -43,27 +43,39 @@
     "label": "GALLERY",
     "images": [
       {
-        "src": "assets/images/gallery_012.jpg",
+        "src": "assets/images/gallery_005.jpg",
         "alt": ""
       },
       {
-        "src": "assets/images/gallery_022.jpg",
+        "src": "assets/images/gallery_015.jpg",
         "alt": ""
       },
       {
-        "src": "assets/images/gallery_027.jpg",
+        "src": "assets/images/gallery_016.jpg",
         "alt": ""
       },
       {
-        "src": "assets/images/gallery_030.jpg",
+        "src": "assets/images/gallery_024.jpg",
         "alt": ""
       },
       {
-        "src": "assets/images/gallery_037.jpg",
+        "src": "assets/images/gallery_029.jpg",
+        "alt": ""
+      },
+      {
+        "src": "assets/images/gallery_031.jpg",
         "alt": ""
       },
       {
         "src": "assets/images/gallery_040.jpg",
+        "alt": ""
+      },
+      {
+        "src": "assets/images/gallery_047.jpg",
+        "alt": ""
+      },
+      {
+        "src": "assets/images/gallery_051.jpg",
         "alt": ""
       }
     ]
@@ -142,13 +154,13 @@
           {
             "relation": "신부 아버지",
             "bank": "하나",
-            "number": "000-0000-0011",
+            "number": "373-910001-99907",
             "holder": "장태수"
           },
           {
             "relation": "신부 어머니",
             "bank": "하나",
-            "number": "000-0000-0012",
+            "number": "351-810451-68607",
             "holder": "이승연"
           }
         ]
@@ -159,12 +171,16 @@
   "guestbook": {
     "label": "GUESTBOOK"
   },
+  "thanks": {
+    "image": "assets/images/gallery_028.jpg",
+    "imageAlt": ""
+  },
   "typography": {
     "hero": {},
     "sectionLabel": {
       "fontFamily": "Cormorant Garamond, serif",
-      "fontSize": "20px",
-      "letterSpacing": "0.22em"
+      "fontSize": "25px",
+      "letterSpacing": "0.05em"
     },
     "sectionTitle": {
       "fontFamily": "serif"
@@ -197,11 +213,11 @@
       "fontSize": "16px"
     },
     "thanks": {
-      "fontFamily": "serif"
+      "fontFamily": "script"
     }
   },
   "music": {
-    "enabled": true,
+    "enabled": false,
     "src": "assets/audio/wedding-music.wav",
     "title": "Wedding Music"
   }

@@ -219,6 +219,27 @@ function setupSlider(wrapSelector, scrollSelector) {
   scrollEl.addEventListener('scroll', update, { passive: true });
   window.addEventListener('resize', update);
   new MutationObserver(update).observe(scrollEl, { childList: true });
+  let isDown = false, startX = 0, startScroll = 0, dragged = false;
+  scrollEl.addEventListener('mousedown', e => {
+    isDown = true;
+    dragged = false;
+    startX = e.pageX;
+    startScroll = scrollEl.scrollLeft;
+    scrollEl.classList.add('is-dragging');
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    const delta = e.pageX - startX;
+    if (Math.abs(delta) > 3) dragged = true;
+    scrollEl.scrollLeft = startScroll - delta;
+  });
+  window.addEventListener('mouseup', () => {
+    isDown = false;
+    scrollEl.classList.remove('is-dragging');
+  });
+  scrollEl.addEventListener('click', e => {
+    if (dragged) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
   update();
 }
 
@@ -308,7 +329,7 @@ const escLines = (value) => {
 let data, gallery = [], activeImage = 0, audio, guestbookEntries = [];
 const toast = message => { const el = $('#toast'); el.textContent = message; el.classList.add('show'); clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove('show'), 2200); };
 const ddaySentence = (iso, groom, bride) => { const wedding = new Date(iso); if (Number.isNaN(wedding)) return ''; const now = new Date(); const inKorea = d => new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Seoul' })); const a = inKorea(now); const b = inKorea(wedding); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); const days = Math.round((b - a) / 86400000); const names = `${esc(groom)} <i>&amp;</i> ${esc(bride)}`; if (days === 0) return `오늘은 ${names}의 <b class="dday-count">결혼식</b>이에요`; if (days > 0) return `${names}의 결혼식까지 <b class="dday-count">${days}일</b> 남았어요`; return `${names}가 결혼한 지 <b class="dday-count">${Math.abs(days)}일</b> 되었어요`; };
-const weddingDate = iso => { const value = new Date(iso); if (Number.isNaN(value)) return { year: '', month: '', day: '', display: '', weekday: '', time: '' }; const values = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: '2-digit', hour12: true }).formatToParts(value).filter(p => p.type !== 'literal').map(p => [p.type, p.value])); const weekday = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', weekday: 'long' }).format(value); const hour = Number(values.hour); const minute = Number(values.minute); const time = `${values.dayPeriod === 'PM' ? '오후' : '오전'} ${hour}시${minute ? ` ${minute}분` : ''}`; return { year: values.year, month: values.month, day: values.day, display: `${values.year}.${values.month}.${values.day}`, weekday, time }; };
+const weddingDate = iso => { const value = new Date(iso); if (Number.isNaN(value)) return { year: '', month: '', day: '', display: '', weekday: '', time: '' }; const values = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: '2-digit', hour12: true }).formatToParts(value).filter(p => p.type !== 'literal').map(p => [p.type, p.value])); const weekday = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', weekday: 'long' }).format(value); const hour = Number(values.hour); const minute = Number(values.minute); const time = `${values.dayPeriod === 'PM' ? '오후' : '오전'} ${hour}시${minute ? ` ${minute}분` : ''}`; return { year: values.year, month: values.month, day: values.day, display: `${values.year}년 ${Number(values.month)}월 ${Number(values.day)}일`, weekday, time }; };
 const parentsLine = (parents, name) => { if (!parents) return ''; const names = [parents.father, parents.mother].filter(Boolean).map(n => `<strong class="invitation-name">${esc(n)}</strong>`).join(' · '); return `<span class="parents-col parents-col-names">${names}의</span><span class="parents-col parents-col-child">${esc(parents.child || '')}</span><span class="parents-col parents-col-name"><strong class="invitation-name">${esc(name)}</strong></span>`; };
 // 신랑/신부 이름에서 성을 뗀 이름만 반환 (한 글자 성을 가정하는 일반적인 관례). invitation 본문 하단·D-day 문구 전용.
 const givenName = (name = '') => { const s = String(name).trim(); return s.length > 1 ? s.slice(1) : s; };
@@ -322,16 +343,16 @@ const tag = (tagName, className, value) => value ? `<${tagName}${className ? ` c
 function page(d) {
   const w = d.wedding || {}, c = d.couple || {}, invitation = d.invitation || {}, when = weddingDate(w.date); gallery = d.gallery?.images || [];
   const accountGroups = d.accounts?.groups || [];
-  const weddingDay = d.weddingDay || {}, galleryData = d.gallery || {}, location = d.location || {}, accounts = d.accounts || {}, guestbook = d.guestbook || {};
+  const weddingDay = d.weddingDay || {}, galleryData = d.gallery || {}, location = d.location || {}, accounts = d.accounts || {}, guestbook = d.guestbook || {}, thanks = d.thanks || {};
   return `
 <header class="hero"><div class="hero-frame"><div class="hero-illustration"><img src="${esc(d.hero?.image)}" alt="${esc(d.hero?.alt)}" onerror="this.parentElement.classList.add('image-error')"></div><canvas class="hero-snow" aria-hidden="true"></canvas><div class="hero-copy"><p class="hero-date"><span>${esc(when.year)}</span><span>${esc(MONTH_ABBR[Number(when.month) - 1] || '')}</span><span>${esc(ordinalDay(when.day))}</span></p><h1 class="hero-headline">Getting<br>Married</h1></div><p class="hero-names-line"><span>${esc(c.brideEn || c.bride)}</span><span>${esc(c.groomEn || c.groom)}</span></p></div></header>
 <section class="section invitation reveal">${tag('p', 'section-label', invitation.label)}${tag('h2', '', invitation.title)}<div class="prose">${(invitation.paragraphs || []).map(p => `<p>${esc(p)}</p>`).join('')}</div><hr class="invitation-divider"><p class="invitation-parents">${parentsLine(c.groomParents, c.groom)}${parentsLine(c.brideParents, c.bride)}</p></section>
 <section class="section info reveal">${tag('p', 'section-label', weddingDay.label)}<h2>${esc(when.display)}<br><span class="wedding-day-time">${esc(when.weekday)} ${esc(when.time)}</span></h2>${weddingCalendar(when)}<div class="countdown" id="countdown" data-target="${esc(w.date)}"><div class="countdown-unit"><span class="countdown-value" data-unit="days">00</span><small>DAYS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="hours">00</span><small>HRS</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="minutes">00</span><small>MIN</small></div><div class="countdown-sep">:</div><div class="countdown-unit"><span class="countdown-value" data-unit="seconds">00</span><small>SEC</small></div></div><strong class="dday">${ddaySentence(w.date, givenName(c.groom), givenName(c.bride))}</strong></section>
-<section class="section gallery-section reveal">${tag('p', 'section-label', galleryData.label)}${tag('h2', '', galleryData.title)}<div class="gallery-featured"><img id="galleryFeaturedImg" src="${esc(gallery[0]?.src)}" alt="${esc(gallery[0]?.alt || '')}"></div><div class="thumbs-slider-wrap"><button type="button" class="slider-nav slider-nav-prev" aria-label="이전 사진 보기">‹</button><div class="gallery-thumbs">${gallery.map((x, i) => `<button type="button" class="gallery-thumb${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="${i + 1}번째 사진 선택"><img src="${esc(x.src)}" alt="${esc(x.alt)}" loading="lazy"></button>`).join('')}</div><button type="button" class="slider-nav slider-nav-next" aria-label="다음 사진 보기">›</button></div></section>
+<section class="section gallery-section reveal">${tag('p', 'section-label', galleryData.label)}${tag('h2', '', galleryData.title)}<div class="featured-slider-wrap"><button type="button" class="slider-nav slider-nav-prev" aria-label="이전 사진 보기">‹</button><div class="gallery-featured"><img id="galleryFeaturedImg" src="${esc(gallery[0]?.src)}" alt="${esc(gallery[0]?.alt || '')}"></div><button type="button" class="slider-nav slider-nav-next" aria-label="다음 사진 보기">›</button></div><div class="thumbs-slider-wrap"><button type="button" class="slider-nav slider-nav-prev" aria-label="이전 사진 보기">‹</button><div class="gallery-thumbs">${gallery.map((x, i) => `<button type="button" class="gallery-thumb${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="${i + 1}번째 사진 선택"><img src="${esc(x.src)}" alt="${esc(x.alt)}" loading="lazy"></button>`).join('')}</div><button type="button" class="slider-nav slider-nav-next" aria-label="다음 사진 보기">›</button></div></section>
 <section class="section location reveal">${tag('p', 'section-label', location.label)}${tag('h2', '', location.title)}${tag('p', 'location-venue', [w.venue, w.hall].filter(Boolean).join(' '))}${tag('p', 'location-address', w.address)}<div id="naverMap" class="map" role="img" aria-label="${esc(location.mapAlt || `${w.venue || '예식장'} 주변 지도`)}"><noscript><img class="map" src="${esc(location.mapImage)}" alt="${esc(location.mapAlt || `${w.venue || '예식장'} 주변 약도`)}"></noscript></div><div class="map-nav-buttons"><button type="button" class="map-nav-button" data-nav="naver"><img class="map-nav-icon" src="assets/icons/naver.png" alt="" loading="lazy"><span>네이버지도</span></button><button type="button" class="map-nav-button" data-nav="kakao"><img class="map-nav-icon" src="assets/icons/kakao.png" alt="" loading="lazy"><span>카카오맵</span></button><button type="button" class="map-nav-button" data-nav="tmap"><img class="map-nav-icon" src="assets/icons/tmap.png" alt="" loading="lazy"><span>티맵</span></button></div><div class="transit">${(location.transit || []).map(x => `<p><b>${esc(x.label)}</b><span>${escLines(x.text)}</span></p>`).join('')}</div></section>
 <section class="section accounts reveal">${tag('p', 'section-label', accounts.label)}${tag('h2', '', accounts.title)}<div class="account-list">${accountGroups.map((group, groupIndex) => `<details class="account-group"><summary><span>${esc(group.side)} 계좌번호</span></summary><div class="account-items"><div class="account-items-inner">${(group.accounts || []).map((account, accountIndex) => `<article class="account-item"><div><h3>${esc(account.holder)}</h3><p>${esc(account.bank)} <b>${esc(account.number)}</b></p></div><button class="copy-button" data-group="${groupIndex}" data-account="${accountIndex}" aria-label="${esc(account.relation)} 계좌번호 복사"><span class="copy-icon">⧉</span>복사</button></article>`).join('')}</div></div></details>`).join('')}</div></section>
 <section class="section guestbook reveal">${tag('p', 'section-label', guestbook.label)}${tag('h2', '', guestbook.title)}<div class="guestbook-slider-wrap"><button type="button" class="slider-nav slider-nav-prev" aria-label="이전 방명록 보기">‹</button><div id="guestbookEntries" class="guestbook-entries" aria-live="polite" aria-label="방명록 목록"><p class="guestbook-state">방명록을 불러오는 중이에요.</p></div><button type="button" class="slider-nav slider-nav-next" aria-label="다음 방명록 보기">›</button></div><div class="guestbook-slider-actions"><button id="guestbookWrite" type="button">✏️작성하기</button><button id="guestbookAll" type="button">📖전체보기</button></div><form id="guestbookForm" class="guestbook-form" hidden><label>이름<input id="guestbookName" name="name" maxlength="20" autocomplete="name" required placeholder="이름을 입력해 주세요"></label><label>축하 메시지<textarea id="guestbookMessage" name="message" maxlength="300" required placeholder="두 분을 위한 축하의 마음을 남겨 주세요"></textarea></label><div class="guestbook-form-actions"><button id="guestbookCancel" class="guestbook-cancel" type="button">취소</button><button class="guestbook-submit" type="submit">남기기</button></div></form><dialog id="guestbookAllDialog" class="guestbook-all-dialog"><div class="guestbook-all-header"><h2>방명록 전체보기</h2><button id="guestbookAllClose" type="button" aria-label="전체보기 닫기">×</button></div><div id="guestbookAllEntries" class="guestbook-all-entries"></div></dialog></section>
-<footer class="thanks reveal"><span>Thank you for celebrating with us</span><h2>${esc(c.groom)} <i>&amp;</i> ${esc(c.bride)}</h2><p>${esc(when.display)}</p></footer>`;
+<footer class="thanks reveal">${thanks.image ? `<div class="thanks-photo"><img src="${esc(thanks.image)}" alt="${esc(thanks.imageAlt)}"><div class="thanks-quote"><span>Thank you</span></div></div>` : ''}</footer>`;
 }
 function setFeaturedImage(index) {
   if (!gallery.length) return;
@@ -340,6 +361,52 @@ function setFeaturedImage(index) {
   const img = $('#galleryFeaturedImg');
   if (img) { img.src = item.src; img.alt = item.alt; }
   document.querySelectorAll('.gallery-thumb').forEach((t, i) => t.classList.toggle('active', i === activeImage));
+}
+function setupFeaturedSlider() {
+  const wrap = document.querySelector('.featured-slider-wrap');
+  const stage = document.querySelector('.gallery-featured');
+  if (!wrap || !stage || gallery.length < 2) return;
+  wrap.classList.add('has-photos');
+  wrap.querySelector('.slider-nav-prev')?.addEventListener('click', () => setFeaturedImage(activeImage - 1));
+  wrap.querySelector('.slider-nav-next')?.addEventListener('click', () => setFeaturedImage(activeImage + 1));
+  let startX = 0, startY = 0, tracking = false;
+  stage.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    tracking = true;
+  }, { passive: true });
+  stage.addEventListener('touchend', e => {
+    if (!tracking) return;
+    tracking = false;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+      setFeaturedImage(activeImage + (dx < 0 ? 1 : -1));
+    }
+  }, { passive: true });
+
+  let mouseDown = false, mouseStartX = 0, mouseDragged = false;
+  stage.addEventListener('mousedown', e => {
+    mouseDown = true;
+    mouseDragged = false;
+    mouseStartX = e.pageX;
+  });
+  window.addEventListener('mousemove', e => {
+    if (!mouseDown) return;
+    if (Math.abs(e.pageX - mouseStartX) > 5) mouseDragged = true;
+  });
+  window.addEventListener('mouseup', e => {
+    if (!mouseDown) return;
+    mouseDown = false;
+    const dx = e.pageX - mouseStartX;
+    if (mouseDragged && Math.abs(dx) > 40) {
+      setFeaturedImage(activeImage + (dx < 0 ? 1 : -1));
+    }
+  });
+  stage.addEventListener('click', e => {
+    if (mouseDragged) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
 }
 function setupAccordion() {
   document.querySelectorAll('.account-group').forEach(details => {
@@ -382,7 +449,7 @@ function renderGuestbookEntries(entries) {
     item.className = 'guestbook-entry';
     const decoration = document.createElement('div');
     decoration.className = 'guestbook-note-decoration';
-    decoration.innerHTML = '<span aria-hidden="true">✽</span>';
+    decoration.innerHTML = '<span aria-hidden="true">❁</span>';
     const name = document.createElement('strong');
     name.textContent = `- ${entry.name} -`;
     const message = document.createElement('p');
@@ -533,7 +600,7 @@ function setupGuestbook() {
   }
 }
 
-function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} & ${d.couple?.bride || '신부'}의 결혼식 초대`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.groups?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); blockImageZoom(); setupHeroSnow(); setupSlider('.thumbs-slider-wrap', '.gallery-thumbs'); setupSlider('.guestbook-slider-wrap', '.guestbook-entries'); }
+function setup(d) { applyTypography(d.typography); $('#app').innerHTML = page(d); document.title = `${d.couple?.groom || '신랑'} 💍 ${d.couple?.bride || '신부'} 결혼합니다`; const observer = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6%' }); document.querySelectorAll('.reveal').forEach((e, i) => { e.style.setProperty('--reveal-delay', `${Math.min(i % 3, 2) * 70}ms`); observer.observe(e); }); document.querySelectorAll('.gallery-thumb').forEach(b => b.addEventListener('click', () => setFeaturedImage(+b.dataset.index))); document.querySelectorAll('.copy-button').forEach(b => b.addEventListener('click', async () => { const item = d.accounts?.groups?.[+b.dataset.group]?.accounts?.[+b.dataset.account]; const text = item?.number; if (!text) return toast('복사할 계좌번호가 없습니다.'); try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text); else { const t = document.createElement('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); } toast(`${item.holder || '계좌번호'} 계좌를 복사했어요.`); } catch { toast('복사하지 못했습니다. 다시 시도해 주세요.'); } })); document.querySelectorAll('.map-nav-button').forEach(b => b.addEventListener('click', () => openMapNav(b.dataset.nav, d.location, d.wedding?.venue))); setupGuestbook(); setupAccordion(); setupCountdown(); setupMap(d.location); setupAudio(d.music); blockImageZoom(); setupHeroSnow(); setupFeaturedSlider(); setupSlider('.thumbs-slider-wrap', '.gallery-thumbs'); setupSlider('.guestbook-slider-wrap', '.guestbook-entries'); }
 let __countdownTimer = null;
 function setupCountdown() {
   const el = $('#countdown');
@@ -628,7 +695,13 @@ function openMapNav(service, loc, venueName) {
   location.href = target.app;
 }
 
-function setupAudio(music) { const btn = $('#musicButton'); if (!music?.enabled || !music.src) { btn.hidden = true; return; } audio = new Audio(music.src); audio.loop = true; audio.volume = .35; const update = playing => { btn.textContent = playing ? 'Ⅱ' : '♪'; btn.setAttribute('aria-label', playing ? '배경 음악 일시 정지' : '배경 음악 재생'); btn.setAttribute('aria-pressed', playing); }; audio.addEventListener('play', () => update(true)); audio.addEventListener('pause', () => update(false)); audio.addEventListener('error', () => { btn.hidden = true; }); audio.play().catch(() => update(false)); btn.addEventListener('click', () => audio.paused ? audio.play().catch(() => toast('음악을 재생할 수 없습니다.')) : audio.pause()); }
-$('#shareButton').addEventListener('click', async () => { const w = data?.wedding || {}, title = `${data?.couple?.groom || '신랑'} & ${data?.couple?.bride || '신부'}의 결혼식에 초대합니다`, text = `${weddingDate(w.date).display || ''}, 저희 결혼합니다.`; try { if (navigator.share) await navigator.share({ title, text, url: location.href }); else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(location.href); toast('청첩장 주소를 복사했어요.'); } else { prompt('아래 주소를 복사해 주세요.', location.href); } } catch (e) { if (e.name !== 'AbortError') toast('공유를 완료하지 못했습니다.'); } });
+function setupAudio(music) { const btn = $('#musicButton'); if (!music?.enabled || !music.src) { btn.hidden = true; return; } btn.hidden = false; audio = new Audio(music.src); audio.loop = true; audio.volume = .35; const update = playing => { btn.textContent = playing ? 'Ⅱ' : '♪'; btn.setAttribute('aria-label', playing ? '배경 음악 일시 정지' : '배경 음악 재생'); btn.setAttribute('aria-pressed', playing); }; audio.addEventListener('play', () => update(true)); audio.addEventListener('pause', () => update(false)); audio.addEventListener('error', () => { btn.hidden = true; }); audio.play().catch(() => update(false)); btn.addEventListener('click', () => audio.paused ? audio.play().catch(() => toast('음악을 재생할 수 없습니다.')) : audio.pause()); }
+$('#shareButton').addEventListener('click', async () => {
+  try {
+    if (navigator.share) await navigator.share({ url: location.href });
+    else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(location.href); toast('청첩장 주소를 복사했어요.'); }
+    else { prompt('아래 주소를 복사해 주세요.', location.href); }
+  } catch (e) { if (e.name !== 'AbortError') toast('공유를 완료하지 못했습니다.'); }
+});
 
 fetch('data/wedding.json').then(r => { if (!r.ok) throw Error(); return r.json(); }).then(d => { data = d; setup(d); }).catch(() => $('#app').innerHTML = '<div class="loading">초대장 정보를 불러오지 못했습니다.</div>');
